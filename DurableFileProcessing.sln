@@ -1,0 +1,30 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30309.148
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{844CF283-191D-49B7-8C5D-15CE4549550B}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DurableFileProcessing", "DurableFileProcessing\DurableFileProcessing.csproj", "{85BF0C46-7A49-413A-9996-BDCC657EA29F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{85BF0C46-7A49-413A-9996-BDCC657EA29F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{85BF0C46-7A49-413A-9996-BDCC657EA29F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{85BF0C46-7A49-413A-9996-BDCC657EA29F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{85BF0C46-7A49-413A-9996-BDCC657EA29F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {09C46EA9-BFFD-45EC-99B4-8E31A55B5671}
+	EndGlobalSection
+EndGlobal
