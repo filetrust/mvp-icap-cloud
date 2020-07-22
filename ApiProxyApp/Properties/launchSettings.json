@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ApiProxyApp": {
+      "commandName": "Project",
+      "commandLineArgs": "-f \"C:\\Users\\paul\\Pictures\\png\""
+    }
+  }
+}
