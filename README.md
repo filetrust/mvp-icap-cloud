@@ -80,7 +80,7 @@ This connection string can then be used to set the `ServiceBusConnectionString` 
 
 Create the service bus queue
 ```
-az servicebus queue create --resource-group <Resource Group Name>  --namespace-name <SB Namespace Name> --name "TransactionOutcome"
+az servicebus queue create --resource-group <Resource Group Name>  --namespace-name <SB Namespace Name> --name "transaction-outcome"
 ```
 The value entered as the `--name` can then be used to set the `TransactionOutcomeQueueName` configuration item.
 
