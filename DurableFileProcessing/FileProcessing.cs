@@ -31,7 +31,7 @@ namespace DurableFileProcessing
             
             log.LogInformation($"FileProcessing SAS Token: {blobSas}");
 
-            var hash = await context.CallActivityAsync<string>("FileProcessing_HashGenerator", blobSas);
+            var fileId = context.InstanceId.ToString();
 
             var filetype = await context.CallActivityAsync<string>("FileProcessing_GetFileType", (configurationSettings, blobSas));
 
@@ -54,12 +54,12 @@ namespace DurableFileProcessing
                 var sourceSas = BlobUtilities.GetSharedAccessSignature(container, blobName, context.CurrentUtcDateTime.AddHours(24), SharedAccessBlobPermissions.Read);
 
                 // Specify the hash value as the rebuilt filename
-                var rebuiltWritesSas = BlobUtilities.GetSharedAccessSignature(rebuildContainer, hash, context.CurrentUtcDateTime.AddHours(24), SharedAccessBlobPermissions.Write);
+                var rebuiltWritesSas = BlobUtilities.GetSharedAccessSignature(rebuildContainer, fileId, context.CurrentUtcDateTime.AddHours(24), SharedAccessBlobPermissions.Write);
                 var rebuildOutcome = await context.CallActivityAsync<ProcessingOutcome>("FileProcessing_RebuildFile", (configurationSettings, sourceSas, rebuiltWritesSas, filetype));
 
                 if (rebuildOutcome == ProcessingOutcome.Rebuilt)
                 {
-                    var rebuiltReadSas = BlobUtilities.GetSharedAccessSignature(rebuildContainer, hash, context.CurrentUtcDateTime.AddHours(24), SharedAccessBlobPermissions.Read);
+                    var rebuiltReadSas = BlobUtilities.GetSharedAccessSignature(rebuildContainer, fileId, context.CurrentUtcDateTime.AddHours(24), SharedAccessBlobPermissions.Read);
                     log.LogInformation($"FileProcessing Rebuild {rebuiltReadSas}");
 
                     await context.CallActivityAsync("FileProcessing_SignalTransactionOutcome", (configurationSettings, blobName, new RebuildOutcome { Outcome = ProcessingOutcome.Rebuilt, RebuiltFileSas = rebuiltReadSas }));
@@ -100,9 +100,9 @@ namespace DurableFileProcessing
             {
                 await rxBlockBlob.DownloadToStreamAsync(fileStream);
 
-                var hash = md5.ComputeHash(fileStream);
-                var base64String = Convert.ToBase64String(hash);
-                return base64String;
+                fileStream.Position = 0;
+
+                return md5.ComputeHash(fileStream).ToString();
             }
         }
 
