@@ -10,7 +10,6 @@ using System.Threading.Tasks;
 
 namespace ApiProxyApp
 {
-
     class Program
     {
         const string FolderKey = "folder-key";
@@ -18,7 +17,7 @@ namespace ApiProxyApp
         const string ServiceBusConnectionStringKey = "service-bus-connection-string";
         const string InputContainerNameKey = "input-container-name";
         const string OutcomeQueueNameKey = "outcome-queue-name";
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             var switchMapping = GetSwitchMapping();
             IConfiguration Configuration = new ConfigurationBuilder()
@@ -33,43 +32,66 @@ namespace ApiProxyApp
             Console.WriteLine($"{InputContainerNameKey} = {Configuration[InputContainerNameKey]}");
             Console.WriteLine($"{OutcomeQueueNameKey} = {Configuration[OutcomeQueueNameKey]}");
 
+            var serviceBusListener = new ServiceBusListener(Configuration[ServiceBusConnectionStringKey], Configuration[OutcomeQueueNameKey]);
+            serviceBusListener.StartListening("file-id");
+
             var files = GetFolderContents(Configuration[FolderKey]);
-            var messageStore = new BlockingCollection<Message>();
 
-            SubmitFiles(Configuration, files, messageStore);
+            var receivedOutcomeInformation = new List<OutcomeInformation>();
+            foreach (var file in files)
+            {
+                var messageListener = new TransactionOutcomeListener(Path.GetFileName(file));
+                messageListener.RegisterNotificationAction(m =>
+                {
+                    var receivedOutcome = new OutcomeInformation
+                    {
+                        FileId = m.GetMessageProperty("file-id"),
+                        Outcome = m.GetMessageProperty("file-outcome"),
+                        RebuildSas = m.GetMessageProperty("file-rebuild-sas")
+                    };
+                    receivedOutcomeInformation.Add(receivedOutcome);
+                    return true;
+                });
+                serviceBusListener.RegisterListener(messageListener);
+            }
+            var cts = new CancellationTokenSource(TimeSpan.FromSeconds(3 * files.Count()));
+            var ct = cts.Token;
+            var writer = new ContainerWriter(Configuration[BlobConnectionStringKey], Configuration[InputContainerNameKey]);
+            var submissionTasks = SubmitFiles(writer, files);
 
-            ProcessMessages(files, messageStore);
+            Task.WaitAll(submissionTasks);
+
+            while(!ct.IsCancellationRequested && files.Count() > receivedOutcomeInformation.Count())
+            {
+                Console.WriteLine($"{receivedOutcomeInformation.Count()} outcomes received, out of {files.Count()}");
+                await Task.Delay(TimeSpan.FromSeconds(1));
+            }
+            cts.Dispose();
+            OutputResults(receivedOutcomeInformation);
 
             Console.WriteLine("Press any key to finish");
             Console.ReadKey();
+            
         }
 
-        private static void SubmitFiles(IConfiguration Configuration, IEnumerable<string> files, BlockingCollection<Message> messageStore)
+        private static void OutputResults(List<OutcomeInformation> receivedOutcomeInformation)
         {
-            var queueClient = new QueueClient(Configuration[ServiceBusConnectionStringKey], Configuration[OutcomeQueueNameKey]);
-            var messageHandlerOptions = new MessageHandlerOptions(ExceptionReceivedHandler)
+            Console.WriteLine("Received the following Outcomes");
+            foreach(var outcome in receivedOutcomeInformation)
             {
-                MaxConcurrentCalls = 1,
-                AutoComplete = false
-            };
-            queueClient.RegisterMessageHandler(async (Message msg, CancellationToken ct) =>
-            {
-                if (msg.Label != "transaction-outcome")
-                    return;
+                Console.WriteLine($"{outcome.FileId} as outcome of {outcome.Outcome}\n\t{outcome.RebuildSas}");
+            }
+        }
 
-                messageStore.Add(msg);
-
-                await queueClient.CompleteAsync(msg.SystemProperties.LockToken);
-            }, messageHandlerOptions);
-
-            var writer = new ContainerWriter(Configuration[BlobConnectionStringKey], Configuration[InputContainerNameKey]);
+        private static Task[] SubmitFiles(ContainerWriter writer, IEnumerable<string> files)
+        {
             var pendingTasks = new List<Task>();
             foreach (var file in files)
             {
                 pendingTasks.Add(writer.Write(file));
             }
 
-            Task.WaitAll(pendingTasks.ToArray());
+            return pendingTasks.ToArray();
         }
 
         private static void ProcessMessages(IEnumerable<string> files, BlockingCollection<Message> messageStore)
@@ -102,17 +124,6 @@ namespace ApiProxyApp
             {
                 Console.WriteLine($"{outcome.FileId} as outcome of {outcome.Outcome}\n\t{outcome.RebuildSas}");
             }
-        }
-
-        static Task ExceptionReceivedHandler(ExceptionReceivedEventArgs exceptionReceivedEventArgs)
-        {
-            Console.WriteLine($"Message handler encountered an exception {exceptionReceivedEventArgs.Exception}.");
-            return Task.CompletedTask;
-        }
-
-        private static Task WriteToContainer(string container, string file)
-        {
-            throw new NotImplementedException();
         }
 
         private static IDictionary<string, string> GetSwitchMapping()
