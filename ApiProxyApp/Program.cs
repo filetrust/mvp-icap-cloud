@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -38,6 +39,9 @@ namespace ApiProxyApp
             var files = GetFolderContents(Configuration[FolderKey]);
 
             var receivedOutcomeInformation = new List<OutcomeInformation>();
+
+            Stopwatch stopWatch = new Stopwatch();
+            stopWatch.Start();
             foreach (var file in files)
             {
                 var messageListener = new TransactionOutcomeListener(Path.GetFileName(file));
@@ -54,33 +58,32 @@ namespace ApiProxyApp
                 });
                 serviceBusListener.RegisterListener(messageListener);
             }
-            var cts = new CancellationTokenSource(TimeSpan.FromSeconds(3 * files.Count()));
-            var ct = cts.Token;
+
             var writer = new ContainerWriter(Configuration[BlobConnectionStringKey], Configuration[InputContainerNameKey]);
             var submissionTasks = SubmitFiles(writer, files);
 
             Task.WaitAll(submissionTasks);
 
-            while(!ct.IsCancellationRequested && files.Count() > receivedOutcomeInformation.Count())
+            while(files.Count() > receivedOutcomeInformation.Count())
             {
                 Console.WriteLine($"{receivedOutcomeInformation.Count()} outcomes received, out of {files.Count()}");
                 await Task.Delay(TimeSpan.FromSeconds(1));
             }
-            cts.Dispose();
-            OutputResults(receivedOutcomeInformation);
+            stopWatch.Stop();
+            OutputResults(receivedOutcomeInformation, stopWatch.Elapsed);
 
             Console.WriteLine("Press any key to finish");
-            Console.ReadKey();
-            
+            Console.ReadKey();            
         }
 
-        private static void OutputResults(List<OutcomeInformation> receivedOutcomeInformation)
+        private static void OutputResults(List<OutcomeInformation> receivedOutcomeInformation, TimeSpan elapsed)
         {
             Console.WriteLine("Received the following Outcomes");
             foreach(var outcome in receivedOutcomeInformation)
             {
                 Console.WriteLine($"{outcome.FileId} as outcome of {outcome.Outcome}\n\t{outcome.RebuildSas}");
             }
+            Console.WriteLine($"Processing time = {elapsed:g}");
         }
 
         private static Task[] SubmitFiles(ContainerWriter writer, IEnumerable<string> files)
