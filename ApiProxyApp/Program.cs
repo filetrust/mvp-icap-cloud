@@ -1,12 +1,9 @@
-﻿using Microsoft.Azure.ServiceBus;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace ApiProxyApp
@@ -95,38 +92,6 @@ namespace ApiProxyApp
             }
 
             return pendingTasks.ToArray();
-        }
-
-        private static void ProcessMessages(IEnumerable<string> files, BlockingCollection<Message> messageStore)
-        {
-            var outstandingOutcomes = new List<string>(files);
-            var receivedOutcomes = new List<OutcomeInformation>();
-            try
-            {
-                do
-                {
-                    var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-
-                    var message = messageStore.Take(cts.Token);
-                    var receivedOutcome = new OutcomeInformation
-                    {
-                        FileId = message.GetMessageProperty("file-id"),
-                        Outcome = message.GetMessageProperty("file-outcome"),
-                        RebuildSas = message.GetMessageProperty("file-rebuild-sas")
-                    };
-                    receivedOutcomes.Add(receivedOutcome);
-                    Console.WriteLine($"Received outcome for {receivedOutcome.FileId}");
-                } while (outstandingOutcomes.Any());
-            }
-            catch (OperationCanceledException)
-            {
-                Console.WriteLine($"Time-out waiting on outcomes for {String.Join(',', outstandingOutcomes)}");
-            }
-
-            foreach (var outcome in receivedOutcomes)
-            {
-                Console.WriteLine($"{outcome.FileId} as outcome of {outcome.Outcome}\n\t{outcome.RebuildSas}");
-            }
         }
 
         private static IDictionary<string, string> GetSwitchMapping()
