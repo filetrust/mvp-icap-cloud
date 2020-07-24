@@ -53,7 +53,10 @@ az group create --location uksouth --name $resourceGroupName
 ```
 
 ### Templated Deployment
-This uses a ARM Template exported from Azure Portal. The template (`template.json`) is held in the `./Setup` folder.
+This uses a ARM Template exported from Azure Portal. 
+> The raw exported template requires a Premium Messaging namespace, due to the inclusion of Network Rules. If a Premium Messaging namespace has not been used, then clause within the template of type "Microsoft.ServiceBus/namespaces/networkRuleSets" should be removed to avoid a failure being reported during deployment.
+
+The exported template (`template.json`) is held in the `./Setup` folder.
 
 ```
 az deployment group create --resource-group  \
