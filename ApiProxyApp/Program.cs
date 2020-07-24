@@ -10,7 +10,7 @@ namespace ApiProxyApp
 {
     class Program
     {
-        const string FolderKey = "folder-key";
+        const string FolderKey = "folder-path";
         const string BlobConnectionStringKey = "blob-container-connection-string";
         const string ServiceBusConnectionStringKey = "service-bus-connection-string";
         const string InputContainerNameKey = "input-container-name";
@@ -20,6 +20,7 @@ namespace ApiProxyApp
             var switchMapping = GetSwitchMapping();
             IConfiguration Configuration = new ConfigurationBuilder()
               .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+              .AddJsonFile("secret.appsettings.json", optional: true, reloadOnChange: true)
               .AddEnvironmentVariables()
               .AddCommandLine(args, switchMapping)
               .Build();
