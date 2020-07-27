@@ -1,0 +1,13 @@
+{
+  "profiles": {
+    "DurableFileProcessing": {
+      "commandName": "Project"
+    },
+    "Docker": {
+      "commandName": "Docker",
+      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}",
+      "httpPort": 32680,
+      "useSSL": false
+    }
+  }
+}
