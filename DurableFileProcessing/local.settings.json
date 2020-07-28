@@ -1,0 +1,14 @@
+﻿{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FileProcessingStorage": "--SECRET--",
+    "ServiceBusConnectionString": "--SECRET--",
+    "TransactionOutcomeQueueName": "transaction-outcome",
+    "FiletypeDetectionUrl": "https://fglpdf9gf6.execute-api.us-west-2.amazonaws.com/Prod/api/FileTypeDetection/sas",
+    "FiletypeDetectionKey": "--SECRET--",
+    "RebuildUrl": "https://sls-uks-qa-rebuild-node.azurewebsites.net/api/v1/rebuild/url",
+    "RebuildKey": "--SECRET--",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet"
+  }
+}
