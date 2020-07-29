@@ -41,22 +41,54 @@ The following configuration is required in `local.settings.json` for the 'Durabl
 ## Setup
 To setup a development environment the following Azure CLI commands can be used to create the necessary resources, and provide the configuration items required in the `local.settings.json` file.
 
-Create a resource group to contain the development resources
+The following commands should be entered in a single Powershell console window. This allows variables to be used to re-use common data values.
+
 ```
-az group create --location uksouth --name <Resource Group Name>
+$resourceGroupName="<Resource Group Name>"
 ```
 
-### Setup Blob Storage Containers
+Create a resource group to contain the development resources
+```
+az group create --location uksouth --name $resourceGroupName
+```
+
+### Templated Deployment
+This uses a ARM Template exported from Azure Portal. 
+> The raw exported template requires a Premium Messaging namespace, due to the inclusion of Network Rules. If a Premium Messaging namespace has not been used, then clause within the template of type "Microsoft.ServiceBus/namespaces/networkRuleSets" should be removed to avoid a failure being reported during deployment.
+
+The exported template (`template.json`) is held in the `./Setup` folder.
+
+```
+az deployment group create --resource-group  \
+            $resourceGroupName --template-file  \
+            ./Setup/template.json 
+```
+
+To retrieve the required connection strings, using the names in the template.  For the Service Bus Connection string.
+```
+az servicebus namespace authorization-rule keys list --resource-group $resourceGroupName  \
+                --namespace-name mvpcloudicapsb --name RootManageSharedAccessKey          \
+                --query primaryConnectionString
+```
+For the Storage Connection string
+```
+az storage account show-connection-string --name mvpcloudicapsa  \
+                --resource-group $resourceGroupName --output tsv
+```
+
+### Manual Deployment
+The following steps will setup the same resource configuration as the Templated Deployment, using the Resource Group created in the earlier section.
+#### Setup Blob Storage Containers
 
 Create the Storage Account
 ```
-az storage account create --name <Storage Account Name> --resource-group <Resource Group Name> --location uksouth
+$storageAccountName=<Storage Account Name> 
+az storage account create --name $storageAccountName --resource-group $resourceGroupName --location uksouth
 ```
 
 Get the Storage Account Connection String and store it in a variable
 ```
-$connectionstring=$(az storage account show-connection-string --name <Storage Account Name> --resource-group <Resource Group Name>)
-$env:AZURE_STORAGE_CONNECTION_STRING = $connectionString
+$connectionstring=$(az storage account show-connection-string --name $storageAccountName --resource-group $resourceGroupName --output tsv)
 ```
 The connection string can then be used to set the `FileProcessingStorage` configuration item. Just type `$connectionString` to access it.
 
@@ -66,23 +98,28 @@ az storage container create --name "original-store" --connection-string $connect
 az storage container create --name "rebuild-store" --connection-string $connectionString
 ```
 
-### Setup Service Bus Queue
+#### Setup Service Bus Queue
 
 Create the Service Bus Namespace
 ```
-az servicebus namespace create --name <SB Namespace Name>  --resource-group <Resource Group Name>  --location uksouth
+$servicebusnamespace=<SB Namespace Name> 
+az servicebus namespace create --name $servicebusnamespace --resource-group $resourceGroupName --location uksouth
 ```
 Get the connection string for the namespace
 ```
-az servicebus namespace authorization-rule keys list --resource-group <Resource Group Name> --namespace-name <SB Namespace Name> --name RootManageSharedAccessKey --query primaryConnectionString
+az servicebus namespace authorization-rule keys list --resource-group $resourceGroupName    \
+            --namespace-name $servicebusnamespace --name RootManageSharedAccessKey          \
+            --query primaryConnectionString
 ```
 This connection string can then be used to set the `ServiceBusConnectionString` configuration item.
 
 Create the service bus queue
 ```
-az servicebus queue create --resource-group <Resource Group Name>  --namespace-name <SB Namespace Name> --name "transaction-outcome"
+$transactionoutcomequeuename="transaction-outcome"
+az servicebus queue create --resource-group $resourceGroupName  --namespace-name $servicebusnamespace   \
+            --name $transactionoutcomequeuename
 ```
-The value entered as the `--name` can then be used to set the `TransactionOutcomeQueueName` configuration item.
+The value of `$transactionoutcomequeuename` can then be used to set the `TransactionOutcomeQueueName` configuration item.
 
 # Storage Emulator
 The [Azure Storage Emulator](https://docs.microsoft.com/en-us/azure/storage/common/storage-use-emulator) can be used to support development by hosting the durable function framework files. Since the file processing APIs need access to the `original` and `rebuilt` stores, these cannot be emulated locally.
