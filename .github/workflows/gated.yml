@@ -2,7 +2,7 @@ name: Gated .net Build
 
 on:
   pull_request:
-    branches: [ master ]
+    branches: [ develop ]
 
 jobs:
   build:
