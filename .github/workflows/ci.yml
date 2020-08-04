@@ -50,6 +50,16 @@
 #      with:
 #        inlineScript: az group deployment create --name template --resource-group ${{ env.RESOURCE_GROUP }} --template-file ${{ env.OUTPUT_PATH }}/Setup/template.json
 #    - name: Overwrite App Settings 📝
+#      uses: cschleiden/replace-tokens@v1
+#      with:
+#        tokenPrefix: '--'
+#        tokenSuffix: '--'
+#        files: 'serverless.yml'
+#      env:
+#        REBUILD_KEY: ${{ secrets.QA_REBUILD_API_KEY }}
+#        FILETYPEDETECTION_KEY: ${{ secrets.QA_FILEYPEDETECTION_API_KEY }}
+#        STORAGE_ACCOUNT_CONNECTION_STRING: $ {{ secrets.QA_STORAGE_CONNECTION_STRING }}
+#        SERVICE_BUS_CONNECTION_STRING: ${{ secrets.SERVICEBUS_CONNECTION_STRING }}
 #    - name: Setup Node 🔧
 #      uses: actions/setup-node@v1
 #      with:
@@ -62,3 +72,4 @@
 #      uses: aaronpanch/action-serverless@v1.0.0
 #      with:
 #        args: deploy
+#
