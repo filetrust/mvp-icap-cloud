@@ -1,0 +1,35 @@
+service: mvp-icap-cloud
+
+provider:
+  name: azure
+  region: UK South
+  runtime: dotnet3.1
+  subscriptionId: --SECRET--
+  armTemplate:
+    file: ../Setup/template.json
+
+  environment: # these will be created as application settings
+    FiletypeDetectionUrl: 'https://fglpdf9gf6.execute-api.us-west-2.amazonaws.com/Prod/api/FileTypeDetection/sas'
+    FiletypeDetectionKey: '--FILETYPEDETECTION_KEY--'
+    RebuildUrl: 'https://sls-uks-qa-rebuild-node.azurewebsites.net/api/v1/rebuild/url'
+    RebuildKey: '--REBUILD_KEY--'
+    FileProcessingStorage: '--STORAGE_ACCOUNT_CONNECTION_STRING--'
+    ServiceBusConnectionString: '--SERVICE_BUS_CONNECTION_STRING--'
+    TransactionOutcomeQueueName: 'transaction-outcome'
+
+plugins:
+  - serverless-azure-functions
+
+package:
+  exclude:
+    - local.settings.json
+
+functions:
+  storageBlob:
+    handler: FileProcessing.RunOrchestrator
+    events:
+      - blob:
+        x-azure-settings:
+          name: gwicappocstorage 
+          path: original-store/{blobName}
+          connection: FileProcessingStorage
