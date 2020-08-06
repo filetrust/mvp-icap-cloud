@@ -72,4 +72,18 @@ jobs:
       uses: aaronpanch/action-serverless@v1.0.0
       with:
         args: deploy --resourceGroup ${{ env.RESOURCE_GROUP }} --subscriptionId ${{ secrets.SUBSCRIPTION_ID }}
+        
+  merge-to-master:
+    runs-on: ubuntu-latest
+    needs: [deploy-to-qa]
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@master
+      - name: Merge to master branch 🔃
+        uses: devmasx/merge-branch@v1.1.0
+        with:
+          type: now
+          target_branch: master
+        env:
+          GITHUB_TOKEN: ${{secrets.TOKEN_GITHUB}}     
 
