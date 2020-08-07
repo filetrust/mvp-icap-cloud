@@ -54,6 +54,8 @@ jobs:
         tokenSuffix: '--'
         files: './DurableFileProcessing/serverless.yml'
       env:
+        FUNCTION_NAME: ${{ env.FUNC_APP_NAME }}
+        SUBSCRIPTION_ID: ${{ secrets.SUBSCRIPTION_ID }}
         REBUILD_URL: ${{ env.REBUILD_URL }}
         REBUILD_KEY: ${{ secrets.QA_REBUILD_API_KEY }}
         FILETYPEDETECTION_URL: ${{ env.FILETYPEDETECTION_URL }} 
@@ -68,6 +70,10 @@ jobs:
       run: npm install
     - name: NPM Install Dependencies 🔧
       run: npm i serverless-azure-functions   
+    - name: Setup .NET Core ${{ env.DOTNET_VERSION }} 🔧
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
     - name: Serverless Deploy 🚀
       uses: aaronpanch/action-serverless@v1.0.0
       with:
