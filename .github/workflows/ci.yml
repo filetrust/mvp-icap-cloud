@@ -23,8 +23,12 @@ jobs:
       uses: actions/setup-node@v2.1.1
     - name: NPM Install 🔧
       run: npm install
+      env: 
+        SERVICE_ROOT: DurableFileProcessing 
     - name: NPM Install Dependencies 🔧
-      run: npm i serverless-azure-functions -g 
+      run: npm i serverless-azure-functions
+      env: 
+        SERVICE_ROOT: DurableFileProcessing 
     - name: Serverless Package 🚀
       uses: aaronpanch/action-serverless@v1.0.0
       with:
