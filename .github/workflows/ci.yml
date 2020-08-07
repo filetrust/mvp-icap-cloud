@@ -19,6 +19,12 @@ jobs:
         dotnet-version: ${{ env.DOTNET_VERSION }}
     - name: Install dependencies 🔧
       run: dotnet restore
+    - name: Setup Node 🔧
+      uses: actions/setup-node@v2.1.1
+    - name: NPM Install 🔧
+      run: npm install
+    - name: NPM Install Dependencies 🔧
+      run: npm i serverless-azure-functions   
     - name: Serverless Package 🚀
       uses: aaronpanch/action-serverless@v1.0.0
       with:
