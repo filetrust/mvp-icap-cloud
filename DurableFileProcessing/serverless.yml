@@ -1,4 +1,4 @@
-service: --FUNCTION_NAME--
+service: durablefileprocessing
 
 provider:
   name: azure
