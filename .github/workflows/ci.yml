@@ -71,7 +71,7 @@ jobs:
     - name: Serverless Deploy 🚀
       uses: aaronpanch/action-serverless@v1.0.0
       with:
-        args: deploy --resourceGroup ${{ env.RESOURCE_GROUP }} --subscriptionId ${{ secrets.SUBSCRIPTION_ID }} --confg ./DurableFileProcessing/serverless.yml
+        args: deploy --resourceGroup ${{ env.RESOURCE_GROUP }} --subscriptionId ${{ secrets.SUBSCRIPTION_ID }} --config ./DurableFileProcessing/serverless.yml
         
   merge-to-master:
     runs-on: ubuntu-latest
