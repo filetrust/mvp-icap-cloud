@@ -52,7 +52,7 @@ jobs:
       with:
         tokenPrefix: '--'
         tokenSuffix: '--'
-        files: '${{ env.OUTPUT_PATH }}/serverless.yml'
+        files: './DurableFileProcessing/serverless.yml'
       env:
         REBUILD_URL: ${{ env.REBUILD_URL }}
         REBUILD_KEY: ${{ secrets.QA_REBUILD_API_KEY }}
@@ -71,7 +71,7 @@ jobs:
     - name: Serverless Deploy 🚀
       uses: aaronpanch/action-serverless@v1.0.0
       with:
-        args: deploy --resourceGroup ${{ env.RESOURCE_GROUP }} --subscriptionId ${{ secrets.SUBSCRIPTION_ID }} --confg ${{ env.OUTPUT_PATH }}/serverless.yml
+        args: deploy --resourceGroup ${{ env.RESOURCE_GROUP }} --subscriptionId ${{ secrets.SUBSCRIPTION_ID }} --confg ./DurableFileProcessing/serverless.yml
         
   merge-to-master:
     runs-on: ubuntu-latest
