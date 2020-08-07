@@ -1,7 +1,7 @@
 name: CI Build
 env:
     OUTPUT_PATH: DurableFileProcessing/.serverless
-    DOTNET_VERSION: "3.1.100"
+    DOTNET_VERSION: "3.1"
     
 on:
   push:
