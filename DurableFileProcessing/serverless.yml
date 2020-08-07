@@ -1,12 +1,10 @@
-service: mvp-icap-cloud
+service: --FUNCTION_NAME--
 
 provider:
   name: azure
   region: UK South
   runtime: dotnet3.1
-  subscriptionId: --SECRET--
-  armTemplate:
-    file: ../Setup/template.json
+  subscriptionId: --SUBSCRIPTION_ID--
 
   environment: # these will be created as application settings
     FiletypeDetectionUrl: '--FILETYPEDETECTION_URL--'
