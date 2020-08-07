@@ -1,6 +1,6 @@
 name: CI Build
 env:
-    OUTPUT_PATH: ${{ github.workspace }}/.output
+    OUTPUT_PATH: DurableFileProcessing/.serverless
     DOTNET_VERSION: "3.1.100"
     
 on:
@@ -19,18 +19,21 @@ jobs:
         dotnet-version: ${{ env.DOTNET_VERSION }}
     - name: Install dependencies 🔧
       run: dotnet restore
-    - name: Build 🔨
-      run: dotnet build --configuration Release --no-restore --output ${{ env.OUTPUT_PATH }}
+    - name: Serverless Package 🚀
+      uses: aaronpanch/action-serverless@v1.0.0
+      with:
+        args: package
+      env: 
+        SERVICE_ROOT: DurableFileProcessing
     - name: Upload Package 📦
       uses: actions/upload-artifact@v1
       with:
-        name: DurableFunction
+        name: DurableFileProcessing
         path: ${{ env.OUTPUT_PATH }}
         
   deploy-to-qa:
     env:
       RESOURCE_GROUP: "gw-icap-rg-qa"
-      FUNC_APP_NAME: durablefileprocessing-qa
       REBUILD_URL: 'https://sls-uks-qa-rebuild-node.azurewebsites.net/api/v1/rebuild/url'
       FILETYPEDETECTION_URL: 'https://fglpdf9gf6.execute-api.us-west-2.amazonaws.com/Prod/api/FileTypeDetection/sas'
     runs-on: ubuntu-latest
@@ -54,7 +57,6 @@ jobs:
         tokenSuffix: '--'
         files: './DurableFileProcessing/serverless.yml'
       env:
-        FUNCTION_NAME: ${{ env.FUNC_APP_NAME }}
         SUBSCRIPTION_ID: ${{ secrets.SUBSCRIPTION_ID }}
         REBUILD_URL: ${{ env.REBUILD_URL }}
         REBUILD_KEY: ${{ secrets.QA_REBUILD_API_KEY }}
@@ -75,7 +77,9 @@ jobs:
     - name: Serverless Deploy 🚀
       uses: aaronpanch/action-serverless@v1.0.0
       with:
-        args: deploy --resourceGroup ${{ env.RESOURCE_GROUP }} --subscriptionId ${{ secrets.SUBSCRIPTION_ID }} --config ./DurableFileProcessing/serverless.yml
+        args: deploy -p ".serverless/durablefileprocessing.zip" --stage qa --resourceGroup ${{ env.RESOURCE_GROUP }} --subscriptionId ${{ secrets.SUBSCRIPTION_ID }}
+      env: 
+        SERVICE_ROOT: DurableFileProcessing
         
   merge-to-master:
     runs-on: ubuntu-latest
