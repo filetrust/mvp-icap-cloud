@@ -26,7 +26,7 @@ jobs:
       uses: thedoctor0/zip-release@master
       with:
         filename: 'durablefileprocessing.zip'
-        directory: 'DurableFileprocessing/tmp_build'
+        directory: 'DurableFileProcessing/tmp_build'
     - name: Upload Package 📦
       uses: actions/upload-artifact@v1
       with:
