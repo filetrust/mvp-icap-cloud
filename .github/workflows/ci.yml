@@ -19,21 +19,13 @@ jobs:
         dotnet-version: ${{ env.DOTNET_VERSION }}
     - name: Install dependencies 🔧
       run: dotnet restore
-    - name: Setup Node 🔧
-      uses: actions/setup-node@v2.1.1
-    - name: NPM Install 🔧
-      run: |
-        npm install
-        npm i serverless-azure-functions
-      working-directory: DurableFileProcessing
     - name: Build 🔨
-      run: dotnet build --configuration Release --no-restore
-    - name: Serverless Package 🚀
-      uses: aaronpanch/action-serverless@v1.0.0
+      run: dotnet build --configuration Release --no-restore --output tmp_build
+      working-directory: DurableFileProcessing
+    - name: Create Zip File
+      uses: montudor/action-zip@v0.1.0
       with:
-        args: package
-      env: 
-        SERVICE_ROOT: DurableFileProcessing
+        args: zip -qq -r ./DurableFileProcessing/.serverless/durablefileprocessing.zip ./DurableFileProcessing/tmp_build
     - name: Upload Package 📦
       uses: actions/upload-artifact@v1
       with:
