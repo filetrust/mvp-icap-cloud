@@ -22,15 +22,16 @@ jobs:
     - name: Build 🔨
       run: dotnet build --configuration Release --no-restore --output tmp_build
       working-directory: DurableFileProcessing
-    - name: Create Zip File
-      uses: montudor/action-zip@v0.1.0
+    - name: Create Package
+      uses: thedoctor0/zip-release@master
       with:
-        args: zip -qq -r ./DurableFileProcessing/durablefileprocessing.zip ./DurableFileProcessing/tmp_build
+        filename: 'durablefileprocessing.zip'
+        directory: 'DurableFileprocessing/tmp_build'
     - name: Upload Package 📦
       uses: actions/upload-artifact@v1
       with:
         name: DurableFileProcessing
-        path: DurableFileProcessing/durablefileprocessing.zip
+        path: DurableFileProcessing/tmp_build/durablefileprocessing.zip
         
   deploy-to-qa:
     env:
