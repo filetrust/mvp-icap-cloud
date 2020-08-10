@@ -82,6 +82,10 @@ jobs:
         args: deploy -p ".serverless/durablefileprocessing.zip" --stage qa --resourceGroup ${{ env.RESOURCE_GROUP }} --subscriptionId ${{ secrets.SUBSCRIPTION_ID }}
       env: 
         SERVICE_ROOT: DurableFileProcessing
+        AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+        AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+        AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
         
   merge-to-master:
     runs-on: ubuntu-latest
