@@ -46,7 +46,7 @@ jobs:
       uses: actions/download-artifact@v1
       with:
         path: ${{ env.OUTPUT_PATH }}
-        name: DurableFunction
+        name: DurableFileProcessing
     - name: Azure Login 🔑
       uses: Azure/login@v1
       with:
