@@ -24,7 +24,7 @@ package:
 
 functions:
   storageBlob:
-    handler: FileProcessing.RunOrchestrator
+    handler: DurableFileProcessing.FileProcessing::RunOrchestrator
     events:
       - blob:
         x-azure-settings:
