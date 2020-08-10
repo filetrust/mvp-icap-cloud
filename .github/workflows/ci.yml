@@ -25,12 +25,12 @@ jobs:
     - name: Create Zip File
       uses: montudor/action-zip@v0.1.0
       with:
-        args: zip -qq -r ./DurableFileProcessing/.serverless/durablefileprocessing.zip ./DurableFileProcessing/tmp_build
+        args: zip -qq -r ./DurableFileProcessing/durablefileprocessing.zip ./DurableFileProcessing/tmp_build
     - name: Upload Package 📦
       uses: actions/upload-artifact@v1
       with:
         name: DurableFileProcessing
-        path: ${{ env.OUTPUT_PATH }}
+        path: DurableFileProcessing/durablefileprocessing.zip
         
   deploy-to-qa:
     env:
