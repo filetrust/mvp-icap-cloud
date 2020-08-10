@@ -1,0 +1,33 @@
+service: durablefileprocessing
+
+provider:
+  name: azure
+  region: UK South
+  runtime: dotnet3.1
+  subscriptionId: --SUBSCRIPTION_ID--
+
+  environment: # these will be created as application settings
+    FiletypeDetectionUrl: '--FILETYPEDETECTION_URL--'
+    FiletypeDetectionKey: '--FILETYPEDETECTION_KEY--'
+    RebuildUrl: '--REBUILD_URL--'
+    RebuildKey: '--REBUILD_KEY--'
+    FileProcessingStorage: '--STORAGE_ACCOUNT_CONNECTION_STRING--'
+    ServiceBusConnectionString: '--SERVICE_BUS_CONNECTION_STRING--'
+    TransactionOutcomeQueueName: 'transaction-outcome'
+
+plugins:
+  - serverless-azure-functions
+
+package:
+  exclude:
+    - local.settings.json
+
+functions:
+  storageBlob:
+    handler: DurableFileProcessing.FileProcessing::RunOrchestrator
+    events:
+      - blob:
+        x-azure-settings:
+          name: gwicappocstorage 
+          path: original-store/{blobName}
+          connection: FileProcessingStorage

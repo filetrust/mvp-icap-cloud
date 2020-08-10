@@ -1,0 +1,104 @@
+name: CI Build
+env:
+    OUTPUT_PATH: DurableFileProcessing/.serverless
+    DOTNET_VERSION: "3.1"
+    
+on:
+  push:
+    branches: [ develop ]
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout 🛎️
+      uses: actions/checkout@v2
+    - name: Setup .NET Core ${{ env.DOTNET_VERSION }} 🔧
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+    - name: Install dependencies 🔧
+      run: dotnet restore
+    - name: Build 🔨
+      run: dotnet build --configuration Release --no-restore --output tmp_build
+      working-directory: DurableFileProcessing
+    - name: Create Package
+      uses: thedoctor0/zip-release@master
+      with:
+        filename: 'durablefileprocessing.zip'
+        directory: 'DurableFileProcessing/tmp_build'
+    - name: Upload Package 📦
+      uses: actions/upload-artifact@v1
+      with:
+        name: DurableFileProcessing
+        path: DurableFileProcessing/tmp_build/durablefileprocessing.zip
+        
+  deploy-to-qa:
+    env:
+      RESOURCE_GROUP: "gw-icap-rg-qa"
+      REBUILD_URL: 'https://sls-uks-qa-rebuild-node.azurewebsites.net/api/v1/rebuild/url'
+      FILETYPEDETECTION_URL: 'https://fglpdf9gf6.execute-api.us-west-2.amazonaws.com/Prod/api/FileTypeDetection/sas'
+    runs-on: ubuntu-latest
+    needs: [package]
+    steps:
+    - name: Checkout 🛎️
+      uses: actions/checkout@v2
+    - name: Download package 📦
+      uses: actions/download-artifact@v1
+      with:
+        path: ${{ env.OUTPUT_PATH }}
+        name: DurableFileProcessing
+    - name: Azure Login 🔑
+      uses: Azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+    - name: Overwrite App Settings 📝
+      uses: cschleiden/replace-tokens@v1
+      with:
+        tokenPrefix: '--'
+        tokenSuffix: '--'
+        files: './DurableFileProcessing/serverless.yml'
+      env:
+        SUBSCRIPTION_ID: ${{ secrets.SUBSCRIPTION_ID }}
+        REBUILD_URL: ${{ env.REBUILD_URL }}
+        REBUILD_KEY: ${{ secrets.QA_REBUILD_API_KEY }}
+        FILETYPEDETECTION_URL: ${{ env.FILETYPEDETECTION_URL }} 
+        FILETYPEDETECTION_KEY: ${{ secrets.QA_FILEYPEDETECTION_API_KEY }}
+        STORAGE_ACCOUNT_CONNECTION_STRING: ${{ secrets.QA_STORAGE_CONNECTION_STRING }}
+        SERVICE_BUS_CONNECTION_STRING: ${{ secrets.QA_SERVICEBUS_CONNECTION_STRING }}
+    - name: Setup .NET Core ${{ env.DOTNET_VERSION }} 🔧
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+    - name: Setup Node 🔧
+      uses: actions/setup-node@v2.1.1
+    - name: NPM Install 🔧
+      run: |
+        npm install
+        npm i serverless-azure-functions
+      working-directory: DurableFileProcessing
+    - name: Serverless Deploy 🚀
+      uses: aaronpanch/action-serverless@v1.0.0
+      with:
+        args: deploy -p ".serverless/durablefileprocessing.zip" --stage qa --resourceGroup ${{ env.RESOURCE_GROUP }} --subscriptionId ${{ secrets.SUBSCRIPTION_ID }}
+      env: 
+        SERVICE_ROOT: DurableFileProcessing
+        AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+        AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+        AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+        
+  merge-to-master:
+    runs-on: ubuntu-latest
+    needs: [deploy-to-qa]
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@master
+      - name: Merge to master branch 🔃
+        uses: devmasx/merge-branch@v1.1.0
+        with:
+          type: now
+          target_branch: master
+        env:
+          GITHUB_TOKEN: ${{secrets.TOKEN_GITHUB}}     
+
