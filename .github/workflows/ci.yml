@@ -26,6 +26,8 @@ jobs:
         npm install
         npm i serverless-azure-functions
       working-directory: DurableFileProcessing
+    - name: Build 🔨
+      run: dotnet build --configuration Release --no-restore
     - name: Serverless Package 🚀
       uses: aaronpanch/action-serverless@v1.0.0
       with:
