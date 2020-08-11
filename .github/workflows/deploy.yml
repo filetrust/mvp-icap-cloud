@@ -76,7 +76,7 @@ jobs:
     - name: Serverless Deploy 🚀
       uses: aaronpanch/action-serverless@v1.0.0
       with:
-        args: deploy -p ".serverless/durablefileprocessing.zip" --stage stage --resourceGroup ${{ env.RESOURCE_GROUP }} --subscriptionId ${{ secrets.SUBSCRIPTION_ID }}
+        args: deploy -p ".serverless/durablefileprocessing.zip" --stage staging --resourceGroup ${{ env.RESOURCE_GROUP }} --subscriptionId ${{ secrets.SUBSCRIPTION_ID }}
       env: 
         SERVICE_ROOT: DurableFileProcessing
         AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
