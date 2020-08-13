@@ -1,4 +1,6 @@
 # MVP ICAP Cloud 
+![CI Build](https://github.com/filetrust/mvp-icap-cloud/workflows/CI%20Build/badge.svg)
+![Deploy Build](https://github.com/filetrust/mvp-icap-cloud/workflows/Deploy%20Build/badge.svg)
 
 ## Durable File Processing
 Using a Blob Trigger to orchestrate a set of actions to be carried out on the uploaded file.
