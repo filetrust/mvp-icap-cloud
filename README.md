@@ -125,3 +125,10 @@ The value of `$transactionoutcomequeuename` can then be used to set the `Transac
 
 # Storage Emulator
 The [Azure Storage Emulator](https://docs.microsoft.com/en-us/azure/storage/common/storage-use-emulator) can be used to support development by hosting the durable function framework files. Since the file processing APIs need access to the `original` and `rebuilt` stores, these cannot be emulated locally.
+
+# Caching
+The Durable File Process function makes use of Azure Table Storage for caching the outcomes of previously processed files. The cached data consists of (function name, file hash, file type, file status, and timestamp)
+
+The reasons for choosing Azure Table Storage can be found in the following document:
+
+[Caching](Documents/Caching for ICAP.docx)
