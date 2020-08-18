@@ -8,6 +8,14 @@ Using a Blob Trigger to orchestrate a set of actions to be carried out on the up
 # High-level Description
 The workflow is triggered by a Blob being added to the `original-store` container (in the `FileProcessingStorage` Azure Storage Account). When the processing of the file is complete, a message is submitted to the `TransactionOutcomeQueue`.
 
+# Architecture
+
+[Minimum Dog-Fooding Architecture](Documents/Images/MinimumDog-FoodingArchitecture.PNG)
+
+[Full Dog-Fooding Architecture](Documents/Images/FullDog-FoodingArchitecture.PNG)
+
+[Administered Architecture](Documents/Images/AdministeredDeploymentArchitecture.PNG)
+
 # Storage
 All workflow storage is persisted in `FileProcessingStorage`
 `original-store` : A Blob container into which any file to be process is written. The addition of blobs to this store triggers the workflow.
