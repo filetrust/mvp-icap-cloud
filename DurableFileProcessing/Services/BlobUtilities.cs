@@ -1,11 +1,11 @@
 ﻿using System;
 using Microsoft.Azure.Storage.Blob;
 
-namespace DurableFileProcessing
+namespace DurableFileProcessing.Services
 {
-    public static class BlobUtilities
+    public class BlobUtilities : IBlobUtilities
     {
-        public static string GetSharedAccessSignature(CloudBlobContainer container, DateTimeOffset expiryTime, SharedAccessBlobPermissions accessPermissions)
+        public string GetSharedAccessSignature(CloudBlobContainer container, DateTimeOffset expiryTime, SharedAccessBlobPermissions accessPermissions)
         {
             SharedAccessBlobPolicy adHocPolicy = new SharedAccessBlobPolicy()
             {
@@ -20,7 +20,7 @@ namespace DurableFileProcessing
             return container.Uri + sasContainerToken;
         }
 
-        public static string GetSharedAccessSignature(CloudBlobContainer container, string blobName, DateTimeOffset expiryTime, SharedAccessBlobPermissions accessPermissions)
+        public string GetSharedAccessSignature(CloudBlobContainer container, string blobName, DateTimeOffset expiryTime, SharedAccessBlobPermissions accessPermissions)
         {
             SharedAccessBlobPolicy adHocPolicy = new SharedAccessBlobPolicy()
             {

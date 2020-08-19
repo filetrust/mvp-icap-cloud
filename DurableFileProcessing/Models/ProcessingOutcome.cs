@@ -1,4 +1,4 @@
-﻿namespace DurableFileProcessing
+﻿namespace DurableFileProcessing.Models
 {
     public enum ProcessingOutcome
     {
