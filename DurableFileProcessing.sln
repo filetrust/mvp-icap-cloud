@@ -10,7 +10,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DurableFileProcessing", "DurableFileProcessing\DurableFileProcessing.csproj", "{85BF0C46-7A49-413A-9996-BDCC657EA29F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApiProxyApp", "ApiProxyApp\ApiProxyApp.csproj", "{5FAAB912-F4E1-4DBF-9FD3-A60EA991E6D2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ApiProxyApp", "ApiProxyApp\ApiProxyApp.csproj", "{5FAAB912-F4E1-4DBF-9FD3-A60EA991E6D2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DurableFileProcessing.Tests", "Tests\DurableFileProcessing.Tests\DurableFileProcessing.Tests.csproj", "{2D5CF6F2-7364-43A2-B87C-3DA0F05043CA}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{021240BB-36B4-4702-A882-20FA4C690BD6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -26,9 +30,16 @@ Global
 		{5FAAB912-F4E1-4DBF-9FD3-A60EA991E6D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5FAAB912-F4E1-4DBF-9FD3-A60EA991E6D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5FAAB912-F4E1-4DBF-9FD3-A60EA991E6D2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2D5CF6F2-7364-43A2-B87C-3DA0F05043CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2D5CF6F2-7364-43A2-B87C-3DA0F05043CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2D5CF6F2-7364-43A2-B87C-3DA0F05043CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2D5CF6F2-7364-43A2-B87C-3DA0F05043CA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{2D5CF6F2-7364-43A2-B87C-3DA0F05043CA} = {021240BB-36B4-4702-A882-20FA4C690BD6}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {09C46EA9-BFFD-45EC-99B4-8E31A55B5671}
