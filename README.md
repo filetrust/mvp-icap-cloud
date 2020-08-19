@@ -8,6 +8,14 @@ Using a Blob Trigger to orchestrate a set of actions to be carried out on the up
 # High-level Description
 The workflow is triggered by a Blob being added to the `original-store` container (in the `FileProcessingStorage` Azure Storage Account). When the processing of the file is complete, a message is submitted to the `TransactionOutcomeQueue`.
 
+# Architecture
+
+[Minimum Dog-Fooding Architecture](Documents/Images/MinimumDog-FoodingArchitecture.PNG)
+
+[Full Dog-Fooding Architecture](Documents/Images/FullDog-FoodingArchitecture.PNG)
+
+[Administered Architecture](Documents/Images/AdministeredDeploymentArchitecture.PNG)
+
 # Storage
 All workflow storage is persisted in `FileProcessingStorage`
 `original-store` : A Blob container into which any file to be process is written. The addition of blobs to this store triggers the workflow.
@@ -125,3 +133,10 @@ The value of `$transactionoutcomequeuename` can then be used to set the `Transac
 
 # Storage Emulator
 The [Azure Storage Emulator](https://docs.microsoft.com/en-us/azure/storage/common/storage-use-emulator) can be used to support development by hosting the durable function framework files. Since the file processing APIs need access to the `original` and `rebuilt` stores, these cannot be emulated locally.
+
+# Caching
+The Durable File Process function makes use of Azure Table Storage for caching the outcomes of previously processed files. The cached data consists of (function name, file hash, file type, file status, and timestamp)
+
+The reasons for choosing Azure Table Storage can be found in the following document:
+
+[Caching for ICAP spike](Documents/CachingForICAP.MD)
