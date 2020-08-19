@@ -139,4 +139,4 @@ The Durable File Process function makes use of Azure Table Storage for caching t
 
 The reasons for choosing Azure Table Storage can be found in the following document:
 
-[Caching for ICAP spike](Documents/CachingForICAP.docx)
+[Caching for ICAP spike](Documents/CachingForICAP.MD)
