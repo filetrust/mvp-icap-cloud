@@ -1,5 +1,5 @@
-﻿using DurableFileProcessing.Models;
-using DurableFileProcessing.Services;
+﻿using DurableFileProcessing.Interfaces;
+using DurableFileProcessing.Models;
 using Microsoft.Azure.ServiceBus;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
@@ -11,24 +11,32 @@ namespace DurableFileProcessing.ActivityFunctions
 {
     public class SignalTransactionOutcome
     {
-        [FunctionName("FileProcessing_SignalTransactionOutcome")]
-        public static async Task Run([ActivityTrigger] IDurableActivityContext context, ILogger log)
-        {
-            (IConfigurationSettings configuration, string fileId, RebuildOutcome outcome) = context.GetInput<(IConfigurationSettings, string, RebuildOutcome)>();
-            log.LogInformation($"SignalTransactionOutcome, fileId='{fileId}', outcome='{outcome.Outcome}'");
-            log.LogInformation($"SignalTransactionOutcome, ServiceBusConnectionString='{configuration.ServiceBusConnectionString}', TransactionOutcomeQueueName='{configuration.TransactionOutcomeQueueName}'");
+        private IAzureQueueClient _queueClient;
 
-            var queueClient = new QueueClient(configuration.ServiceBusConnectionString, configuration.TransactionOutcomeQueueName);
+        public SignalTransactionOutcome(IAzureQueueClient queueClient)
+        {
+            _queueClient = queueClient;
+        }
+
+        [FunctionName("FileProcessing_SignalTransactionOutcome")]
+        public async Task Run([ActivityTrigger] IDurableActivityContext context, ILogger log)
+        {
+            (string fileId, RebuildOutcome outcome) = context.GetInput<(string, RebuildOutcome)>();
+
+            log.LogInformation($"SignalTransactionOutcome, fileId='{fileId}', outcome='{outcome.Outcome}'");
+
             var message = new Message
             {
                 Label = "transaction-outcome"
             };
+
             message.UserProperties.Add("file-id", fileId);
             message.UserProperties.Add("file-outcome", Enum.GetName(typeof(ProcessingOutcome), outcome.Outcome));
             message.UserProperties.Add("file-rebuild-sas", outcome.RebuiltFileSas);
-            await queueClient.SendAsync(message);
 
-            await queueClient.CloseAsync();
+            await _queueClient.SendAsync(message);
+
+            await _queueClient.CloseAsync();
         }
     }
 }

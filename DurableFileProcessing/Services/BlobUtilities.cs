@@ -1,4 +1,5 @@
 ﻿using System;
+using DurableFileProcessing.Interfaces;
 using Microsoft.Azure.Storage.Blob;
 
 namespace DurableFileProcessing.Services

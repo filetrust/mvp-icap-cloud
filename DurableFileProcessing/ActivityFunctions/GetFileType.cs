@@ -1,4 +1,4 @@
-﻿using DurableFileProcessing.Services;
+﻿using DurableFileProcessing.Interfaces;
 using Flurl.Http;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
@@ -10,12 +10,19 @@ namespace DurableFileProcessing.ActivityFunctions
 {
     public class GetFileType
     {
-        [FunctionName("FileProcessing_GetFileType")]
-        public static async Task<string> Run([ActivityTrigger] IDurableActivityContext context, ILogger log)
+        private readonly IConfigurationSettings _configurationSettings;
+
+        public GetFileType(IConfigurationSettings configurationSettings)
         {
-            (IConfigurationSettings configuration, string blobSas) = context.GetInput<(IConfigurationSettings, string)>();
-            var filetypeDetectionUrl = configuration.FiletypeDetectionUrl;
-            var filetypeDetectionKey = configuration.FiletypeDetectionKey;
+            _configurationSettings = configurationSettings;
+        }
+
+        [FunctionName("FileProcessing_GetFileType")]
+        public async Task<string> Run([ActivityTrigger] IDurableActivityContext context, ILogger log)
+        {
+            string blobSas = context.GetInput<string>();
+            var filetypeDetectionUrl = _configurationSettings.FiletypeDetectionUrl;
+            var filetypeDetectionKey = _configurationSettings.FiletypeDetectionKey;
 
             log.LogInformation($"GetFileType, filetypeDetectionUrl='{filetypeDetectionUrl}'");
             log.LogInformation($"GetFileType, blobSas='{blobSas}'");

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DurableFileProcessing.Interfaces;
+using System;
 
 namespace DurableFileProcessing.Services
 {

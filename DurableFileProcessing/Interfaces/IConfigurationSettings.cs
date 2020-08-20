@@ -1,4 +1,4 @@
-﻿namespace DurableFileProcessing.Services
+﻿namespace DurableFileProcessing.Interfaces
 {
     public interface IConfigurationSettings
     {

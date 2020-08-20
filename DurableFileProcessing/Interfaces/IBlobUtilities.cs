@@ -1,7 +1,7 @@
 ﻿using Microsoft.Azure.Storage.Blob;
 using System;
 
-namespace DurableFileProcessing.Services
+namespace DurableFileProcessing.Interfaces
 {
     public interface IBlobUtilities
     {

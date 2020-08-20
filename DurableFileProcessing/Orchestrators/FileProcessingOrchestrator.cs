@@ -1,5 +1,5 @@
+using DurableFileProcessing.Interfaces;
 using DurableFileProcessing.Models;
-using DurableFileProcessing.Services;
 using Flurl;
 using Microsoft.Azure.Storage.Blob;
 using Microsoft.Azure.WebJobs;
@@ -8,23 +8,23 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
 
-namespace DurableFileProcessing.OrchestrationFunctions
+namespace DurableFileProcessing.Orchestrators
 {
     [StorageAccount("FileProcessingStorage")]
-    public class FileProcessing
+    public class FileProcessingOrchestrator
     {
-        private readonly IStorageAccount _storageAccount;
+        private readonly IAzureStorageAccount _storageAccount;
         private readonly IBlobUtilities _blobUtilities;
         private readonly IConfigurationSettings _configurationSettings;
 
-        public FileProcessing(IStorageAccount storageAccount, IBlobUtilities blobUtilities, IConfigurationSettings configurationSettings)
+        public FileProcessingOrchestrator(IAzureStorageAccount storageAccount, IBlobUtilities blobUtilities, IConfigurationSettings configurationSettings)
         {
             _storageAccount = storageAccount;
             _blobUtilities = blobUtilities;
             _configurationSettings = configurationSettings;
         }
 
-        [FunctionName("FileProcessing")]
+        [FunctionName(nameof(FileProcessingOrchestrator))]
         public async Task RunOrchestrator(
             [OrchestrationTrigger] IDurableOrchestrationContext context,
             [Blob("original-store")] CloudBlobContainer container,
@@ -38,20 +38,21 @@ namespace DurableFileProcessing.OrchestrationFunctions
 
             var fileId = context.InstanceId.ToString();
 
-            var filetype = await context.CallActivityAsync<string>("FileProcessing_GetFileType", (_configurationSettings, blobSas));
+            var filetype = await context.CallActivityAsync<string>("FileProcessing_GetFileType", (blobSas));
 
             if (filetype == "error")
             {
-                await context.CallActivityAsync("FileProcessing_SignalTransactionOutcome", (_configurationSettings, blobName, new RebuildOutcome { Outcome = ProcessingOutcome.Error, RebuiltFileSas = String.Empty }));
+                await context.CallActivityAsync("FileProcessing_SignalTransactionOutcome", (blobName, new RebuildOutcome { Outcome = ProcessingOutcome.Error, RebuiltFileSas = String.Empty }));
             }
             else if (filetype == "unmanaged")
             {
-                await context.CallActivityAsync("FileProcessing_SignalTransactionOutcome", (_configurationSettings, blobName, new RebuildOutcome { Outcome = ProcessingOutcome.Unknown, RebuiltFileSas = String.Empty }));
+                await context.CallActivityAsync("FileProcessing_SignalTransactionOutcome", (blobName, new RebuildOutcome { Outcome = ProcessingOutcome.Unknown, RebuiltFileSas = String.Empty }));
             }
             else
             {
                 log.LogInformation($"FileProcessing {filetype}");
                 var fileProcessingStorage = _storageAccount.GetClient(_configurationSettings.FileProcessingStorage);
+                
                 var rebuildUrl = Url.Combine(fileProcessingStorage.BlobEndpoint.AbsoluteUri, "rebuild-store");
                 log.LogInformation($"FileProcessing using  {rebuildUrl}");
 
@@ -60,19 +61,19 @@ namespace DurableFileProcessing.OrchestrationFunctions
 
                 // Specify the hash value as the rebuilt filename
                 var rebuiltWritesSas = _blobUtilities.GetSharedAccessSignature(rebuildContainer, fileId, context.CurrentUtcDateTime.AddHours(24), SharedAccessBlobPermissions.Write);
-                var rebuildOutcome = await context.CallActivityAsync<ProcessingOutcome>("FileProcessing_RebuildFile", (_configurationSettings, sourceSas, rebuiltWritesSas, filetype));
+                var rebuildOutcome = await context.CallActivityAsync<ProcessingOutcome>("FileProcessing_RebuildFile", (sourceSas, rebuiltWritesSas, filetype));
 
                 if (rebuildOutcome == ProcessingOutcome.Rebuilt)
                 {
                     var rebuiltReadSas = _blobUtilities.GetSharedAccessSignature(rebuildContainer, fileId, context.CurrentUtcDateTime.AddHours(24), SharedAccessBlobPermissions.Read);
                     log.LogInformation($"FileProcessing Rebuild {rebuiltReadSas}");
 
-                    await context.CallActivityAsync("FileProcessing_SignalTransactionOutcome", (_configurationSettings, blobName, new RebuildOutcome { Outcome = ProcessingOutcome.Rebuilt, RebuiltFileSas = rebuiltReadSas }));
+                    await context.CallActivityAsync("FileProcessing_SignalTransactionOutcome", (blobName, new RebuildOutcome { Outcome = ProcessingOutcome.Rebuilt, RebuiltFileSas = rebuiltReadSas }));
                 }
                 else
                 {
                     log.LogInformation($"FileProcessing Rebuild failure");
-                    await context.CallActivityAsync("FileProcessing_SignalTransactionOutcome", (_configurationSettings, blobName, new RebuildOutcome { Outcome = ProcessingOutcome.Failed, RebuiltFileSas = String.Empty }));
+                    await context.CallActivityAsync("FileProcessing_SignalTransactionOutcome", (blobName, new RebuildOutcome { Outcome = ProcessingOutcome.Failed, RebuiltFileSas = String.Empty }));
                 }
             }
         }

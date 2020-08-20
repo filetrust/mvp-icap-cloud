@@ -1,8 +1,8 @@
 ﻿using Microsoft.Azure.Storage;
 
-namespace DurableFileProcessing.Services
+namespace DurableFileProcessing.Interfaces
 {
-    public interface IStorageAccount
+    public interface IAzureStorageAccount
     {
         public CloudStorageAccount GetClient(string connectionString);
     }

@@ -6,20 +6,27 @@ using Microsoft.Extensions.Logging;
 using System;
 using Dynamitey.DynamicObjects;
 using System.Threading.Tasks;
-using DurableFileProcessing.Services;
 using DurableFileProcessing.Models;
+using DurableFileProcessing.Interfaces;
 
 namespace DurableFileProcessing.ActivityFunctions
 {
     public class RebuildFile
     {
-        [FunctionName("FileProcessing_RebuildFile")]
-        public static async Task<ProcessingOutcome> Run([ActivityTrigger] IDurableActivityContext context, ILogger log)
+        private readonly IConfigurationSettings _configurationSettings;
+
+        public RebuildFile(IConfigurationSettings configurationSettings)
         {
-            (IConfigurationSettings configuration, string receivedSas, string rebuildSas, string receivedFiletype) = context.GetInput<(IConfigurationSettings, string, string, string)>();
+            _configurationSettings = configurationSettings;
+        }
+
+        [FunctionName("FileProcessing_RebuildFile")]
+        public async Task<ProcessingOutcome> Run([ActivityTrigger] IDurableActivityContext context, ILogger log)
+        {
+            (string receivedSas, string rebuildSas, string receivedFiletype) = context.GetInput<(string, string, string)>();
             log.LogInformation($"RebuildFileAsync, receivedSas='{receivedSas}', rebuildSas='{rebuildSas}', receivedFiletype='{receivedFiletype}'");
-            var rebuildUrl = configuration.RebuildUrl;
-            var rebuildKey = configuration.RebuildKey;
+            var rebuildUrl = _configurationSettings.RebuildUrl;
+            var rebuildKey = _configurationSettings.RebuildKey;
             try
             {
                 var response = await rebuildUrl
