@@ -249,46 +249,5 @@ namespace DurableFileProcessing.Tests
                 Assert.That(actualOutcome.RebuiltFileSas, Is.EqualTo(expectedOutcome.RebuiltFileSas));
             }
         }
-
-        //public class GetConfigurationSettingsTests : FileProcessingTests
-        //{
-        //    [Test]
-        //    public async Task GetConfigurationSettings_Returns_The_Correct_Settings()
-        //    {
-        //        // Arrange
-        //        var expectedSettings = new ConfigurationSettings
-        //        {
-        //            FileProcessingStorage = "testStorage",
-        //            FiletypeDetectionKey = "testFileTypeDetectionKey",
-        //            FiletypeDetectionUrl = "testFileTypeDestectionUrl",
-        //            RebuildKey = "testRebuildKey",
-        //            RebuildUrl = "testRebuildUrl",
-        //            ServiceBusConnectionString = "TestServiceBusConnectionString",
-        //            TransactionOutcomeQueueName = "testQueueName"
-        //        };
-
-        //        var durableActivityContext = new Mock<IDurableActivityContext>();
-
-        //        Environment.SetEnvironmentVariable("FileProcessingStorage", expectedSettings.FileProcessingStorage);
-        //        Environment.SetEnvironmentVariable("TransactionOutcomeQueueName", expectedSettings.TransactionOutcomeQueueName);
-        //        Environment.SetEnvironmentVariable("FiletypeDetectionUrl", expectedSettings.FiletypeDetectionUrl);
-        //        Environment.SetEnvironmentVariable("ServiceBusConnectionString", expectedSettings.ServiceBusConnectionString);
-        //        Environment.SetEnvironmentVariable("FiletypeDetectionKey", expectedSettings.FiletypeDetectionKey);
-        //        Environment.SetEnvironmentVariable("RebuildUrl", expectedSettings.RebuildUrl);
-        //        Environment.SetEnvironmentVariable("RebuildKey", expectedSettings.RebuildKey);
-
-        //        // Act
-        //        var actualSettings = await FileProcessing.GetConfigurationSettings(durableActivityContext.Object);
-
-        //        // Assert
-        //        Assert.That(actualSettings.FileProcessingStorage, Is.EqualTo(expectedSettings.FileProcessingStorage));
-        //        Assert.That(actualSettings.FiletypeDetectionKey, Is.EqualTo(expectedSettings.FiletypeDetectionKey));
-        //        Assert.That(actualSettings.FiletypeDetectionUrl, Is.EqualTo(expectedSettings.FiletypeDetectionUrl));
-        //        Assert.That(actualSettings.RebuildKey, Is.EqualTo(expectedSettings.RebuildKey));
-        //        Assert.That(actualSettings.RebuildUrl, Is.EqualTo(expectedSettings.RebuildUrl));
-        //        Assert.That(actualSettings.ServiceBusConnectionString, Is.EqualTo(expectedSettings.ServiceBusConnectionString));
-        //        Assert.That(actualSettings.TransactionOutcomeQueueName, Is.EqualTo(expectedSettings.TransactionOutcomeQueueName));
-        //    }
-        //}
     }
 }
