@@ -24,7 +24,7 @@ namespace DurableFileProcessing.ActivityFunctions
 
                 fileStream.Position = 0;
 
-                return md5.ComputeHash(fileStream).ToString();
+                return md5.ComputeHash(fileStream).ToString(); //lgtm [cs/call-to-object-tostring] Going to be reworked, not currently used
             }
         }
     }

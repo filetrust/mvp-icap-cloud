@@ -38,7 +38,7 @@ namespace DurableFileProcessing.Tests.Services
                 // Arrange
                 var dummyContainer = new CloudBlobContainer(
                     new Uri("http://test-storage.org"),
-                    new StorageCredentials("fakeaccoutn",
+                    new StorageCredentials("fakeaccount",
                     Convert.ToBase64String(Encoding.Unicode.GetBytes("fakekeyval")), "fakekeyname"));
 
                 var blobUtilities = new BlobUtilities();
