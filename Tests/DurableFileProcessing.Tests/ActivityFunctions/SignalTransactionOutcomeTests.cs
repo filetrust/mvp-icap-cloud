@@ -21,7 +21,7 @@ namespace DurableFileProcessing.Tests.ActivityFunctions
 
             private RebuildOutcome _rebuildOutcome;
 
-            private Mock<IAzureQueueClient> _mockQueueClient;
+            private Mock<IMessageClient<Message>> _mockQueueClient;
             private Mock<IDurableActivityContext> _mockContext;
             private Mock<ILogger> _mockLogger;
 
@@ -30,7 +30,7 @@ namespace DurableFileProcessing.Tests.ActivityFunctions
             [SetUp]
             public void Setup()
             {
-                _mockQueueClient = new Mock<IAzureQueueClient>();
+                _mockQueueClient = new Mock<IMessageClient<Message>>();
                 _mockContext = new Mock<IDurableActivityContext>();
                 _mockLogger = new Mock<ILogger>();
 

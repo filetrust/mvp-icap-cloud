@@ -1,6 +1,7 @@
 using DurableFileProcessing.Interfaces;
 using DurableFileProcessing.Models;
 using Flurl;
+using Microsoft.Azure.Storage;
 using Microsoft.Azure.Storage.Blob;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
@@ -13,11 +14,11 @@ namespace DurableFileProcessing.Orchestrators
     [StorageAccount("FileProcessingStorage")]
     public class FileProcessingOrchestrator
     {
-        private readonly IAzureStorageAccount _storageAccount;
+        private readonly IStorageAccount<CloudStorageAccount> _storageAccount;
         private readonly IBlobUtilities _blobUtilities;
         private readonly IConfigurationSettings _configurationSettings;
 
-        public FileProcessingOrchestrator(IAzureStorageAccount storageAccount, IBlobUtilities blobUtilities, IConfigurationSettings configurationSettings)
+        public FileProcessingOrchestrator(IStorageAccount<CloudStorageAccount> storageAccount, IBlobUtilities blobUtilities, IConfigurationSettings configurationSettings)
         {
             _storageAccount = storageAccount;
             _blobUtilities = blobUtilities;

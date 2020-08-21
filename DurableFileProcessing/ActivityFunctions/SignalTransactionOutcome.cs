@@ -11,9 +11,9 @@ namespace DurableFileProcessing.ActivityFunctions
 {
     public class SignalTransactionOutcome
     {
-        private IAzureQueueClient _queueClient;
+        private IMessageClient<Message> _queueClient;
 
-        public SignalTransactionOutcome(IAzureQueueClient queueClient)
+        public SignalTransactionOutcome(IMessageClient<Message> queueClient)
         {
             _queueClient = queueClient;
         }

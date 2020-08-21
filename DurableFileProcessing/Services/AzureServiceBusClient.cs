@@ -5,12 +5,12 @@ using System.Threading.Tasks;
 
 namespace DurableFileProcessing.Services
 {
-    public class AzureQueueClient : IAzureQueueClient
+    public class AzureServiceBusClient : IMessageClient<Message>
     {
         private readonly QueueClient _queueClient;
         private readonly IConfigurationSettings _configurationSettings;
 
-        public AzureQueueClient(IConfigurationSettings configurationSettings)
+        public AzureServiceBusClient(IConfigurationSettings configurationSettings)
         {
             _configurationSettings = configurationSettings;
 
@@ -24,8 +24,6 @@ namespace DurableFileProcessing.Services
 
         public async Task SendAsync(Message message)
         {
-            if (message == null) throw new ArgumentNullException(nameof(message));
-
             await _queueClient.SendAsync(message);
         }
     }

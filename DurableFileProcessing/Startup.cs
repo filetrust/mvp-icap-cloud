@@ -11,8 +11,8 @@ namespace DurableFileProcessing
         public override void Configure(IFunctionsHostBuilder builder)
         {
             builder.Services.AddSingleton<IBlobUtilities, BlobUtilities>();
-            builder.Services.AddTransient<IAzureQueueClient, AzureQueueClient>();
-            builder.Services.AddTransient<IAzureStorageAccount, AzureStorageAccount>();
+            builder.Services.AddTransient(typeof(IMessageClient<>), typeof(AzureServiceBusClient));
+            builder.Services.AddTransient(typeof(IStorageAccount<>), typeof(AzureStorageAccount));
             builder.Services.AddSingleton<IConfigurationSettings, ConfigurationSettings>();
         }
     }

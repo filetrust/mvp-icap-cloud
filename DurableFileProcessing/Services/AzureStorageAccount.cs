@@ -3,7 +3,7 @@ using DurableFileProcessing.Interfaces;
 
 namespace DurableFileProcessing.Services
 {
-    public class AzureStorageAccount : IAzureStorageAccount
+    public class AzureStorageAccount : IStorageAccount<CloudStorageAccount>
     {
         public CloudStorageAccount GetClient(string connectionString)
         {

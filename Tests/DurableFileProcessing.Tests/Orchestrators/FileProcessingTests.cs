@@ -31,7 +31,7 @@ namespace DurableFileProcessing.Tests
             private Mock<IDurableOrchestrationContext> _mockContext;
             private Mock<ILogger> _mockLogger;
             private Mock<IConfigurationSettings> _mockSettings;
-            private Mock<IAzureStorageAccount> _mockAzureStorageAccount;
+            private Mock<IStorageAccount<CloudStorageAccount>> _mockAzureStorageAccount;
             private Mock<IBlobUtilities> _mockBlobUtilities;
 
             private Mock<CloudStorageAccount> _mockCloudStorageAccount;
@@ -51,7 +51,7 @@ namespace DurableFileProcessing.Tests
                 _mockContext = new Mock<IDurableOrchestrationContext>();
                 _mockLogger = new Mock<ILogger>();
                 _mockSettings = new Mock<IConfigurationSettings>();
-                _mockAzureStorageAccount = new Mock<IAzureStorageAccount>();
+                _mockAzureStorageAccount = new Mock<IStorageAccount<CloudStorageAccount>>();
                 _mockBlobUtilities = new Mock<IBlobUtilities>();
                 _mockCloudStorageAccount = new Mock<CloudStorageAccount>(new StorageCredentials("dummyAccountName", "dummykey"), false);
 
