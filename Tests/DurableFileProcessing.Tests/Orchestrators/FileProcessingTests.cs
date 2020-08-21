@@ -44,7 +44,7 @@ namespace DurableFileProcessing.Tests
                 _cloudBlobContainer = new CloudBlobContainer(
                     new Uri("http://tempuri.org/blob"),
                     new StorageCredentials(
-                    "fakeaccoutn",
+                    "fakeaccount",
                     Convert.ToBase64String(Encoding.Unicode.GetBytes("fakekeyval")),
                     "fakekeyname"));
 
