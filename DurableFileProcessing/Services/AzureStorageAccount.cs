@@ -1,5 +1,5 @@
-﻿using Microsoft.Azure.Storage;
-using DurableFileProcessing.Interfaces;
+﻿using DurableFileProcessing.Interfaces;
+using Microsoft.Azure.Storage;
 
 namespace DurableFileProcessing.Services
 {

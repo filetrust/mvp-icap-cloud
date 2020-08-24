@@ -3,7 +3,9 @@
   "Values": {
     "AzureWebJobsStorage": "UseDevelopmentStorage=true",
     "FileProcessingStorage": "--SECRET--",
+    "CacheConnectionString": "--SECRET--",
     "ServiceBusConnectionString": "--SECRET--",
+    "TransactionOutcomeTableName": "filestatuscache",
     "TransactionOutcomeQueueName": "transaction-outcome",
     "FiletypeDetectionUrl": "https://fglpdf9gf6.execute-api.us-west-2.amazonaws.com/Prod/api/FileTypeDetection/sas",
     "FiletypeDetectionKey": "--SECRET--",
