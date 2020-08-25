@@ -86,7 +86,10 @@ namespace DurableFileProcessing.Orchestrators
                 }
             }
 
-            await context.CallActivityAsync("FileProcessing_InsertEntityIntoCache", (hash, fileStatus.ToString(), filetype));
+            if (cachedEntry == null)
+            {
+                await context.CallActivityAsync("FileProcessing_InsertEntityIntoCache", (hash, fileStatus.ToString(), filetype));
+            }
         }
     }
 }

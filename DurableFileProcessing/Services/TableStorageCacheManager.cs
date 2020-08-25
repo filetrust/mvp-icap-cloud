@@ -18,7 +18,7 @@ namespace DurableFileProcessing.Services
 
         public async Task<OutcomeEntity> GetEntityAsync(string partitionKey, string rowKey)
         {
-            var table = _cacheClient.Client.GetTableReference(_configurationSettings.TransactionOutcomeTableName);
+            var table = _cacheClient.Client.GetTableReference(_configurationSettings.CacheConnectionString);
 
             var retrieveOperation = TableOperation.Retrieve<OutcomeEntity>(partitionKey, rowKey);
 
@@ -34,7 +34,7 @@ namespace DurableFileProcessing.Services
 
         public async Task InsertEntityAsync(OutcomeEntity entity)
         {
-            var table = _cacheClient.Client.GetTableReference(_configurationSettings.TransactionOutcomeTableName);
+            var table = _cacheClient.Client.GetTableReference(_configurationSettings.CacheConnectionString);
 
             var insertOperation = TableOperation.InsertOrMerge(entity);
 

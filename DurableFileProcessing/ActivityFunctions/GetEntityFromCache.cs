@@ -21,7 +21,15 @@ namespace DurableFileProcessing.ActivityFunctions
         {
             string fileHash = context.GetInput<string>();
 
-            return await _cacheManager.GetEntityAsync("durablefileprocessing", fileHash);
+            var entity = await _cacheManager.GetEntityAsync("durablefileprocessing", fileHash);
+
+            if(entity == null)
+            {
+                log.LogDebug($"No entity for hash: {fileHash} found in cache.");
+            }
+
+            log.LogDebug($"Entity for hash: {fileHash} found in cache. File Status: {entity.FileStatus}, File Type: {entity.FileType}, TimeStamp: {entity.Timestamp}");
+            return entity;
         }
     }
 }
