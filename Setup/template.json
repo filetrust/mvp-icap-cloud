@@ -3,11 +3,11 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
       "namespaces_mvpcloudicapsb_name": {
-        "defaultValue": "gwicapqasb",
+        "defaultValue": "mvpcloudicapsb",
         "type": "String"
       },
         "storageAccounts_mvpcloudicapsa_name": {
-            "defaultValue": "gwicapqasa",
+            "defaultValue": "mvpcloudicapsa",
             "type": "String"
         }
     },
