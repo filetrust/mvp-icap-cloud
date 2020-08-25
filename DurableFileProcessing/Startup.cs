@@ -14,6 +14,8 @@ namespace DurableFileProcessing
             builder.Services.AddTransient(typeof(IMessageClient<>), typeof(AzureServiceBusClient));
             builder.Services.AddTransient(typeof(IStorageAccount<>), typeof(AzureStorageAccount));
             builder.Services.AddSingleton<IConfigurationSettings, ConfigurationSettings>();
+            builder.Services.AddSingleton(typeof(ICacheClient<>), typeof(TableStorageCacheClient));
+            builder.Services.AddTransient(typeof(ICacheManager<>), typeof(TableStorageCacheManager));
         }
     }
 }

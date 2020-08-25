@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.IO;
 using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace DurableFileProcessing.ActivityFunctions
@@ -24,7 +25,14 @@ namespace DurableFileProcessing.ActivityFunctions
 
                 fileStream.Position = 0;
 
-                return md5.ComputeHash(fileStream).ToString(); //lgtm [cs/call-to-object-tostring] Going to be reworked, not currently used
+                var hash = md5.ComputeHash(fileStream);
+
+                var stringBuilder = new StringBuilder();
+
+                foreach (byte b in hash)
+                    stringBuilder.AppendFormat("{0:X2}", b);
+
+                return stringBuilder.ToString();
             }
         }
     }
