@@ -8,7 +8,9 @@ namespace DurableFileProcessing.Services
         public ConfigurationSettings()
         {
             FileProcessingStorage = Environment.GetEnvironmentVariable("FileProcessingStorage", EnvironmentVariableTarget.Process);
+            CacheConnectionString = Environment.GetEnvironmentVariable("CacheConnectionString", EnvironmentVariableTarget.Process);
             TransactionOutcomeQueueName = Environment.GetEnvironmentVariable("TransactionOutcomeQueueName", EnvironmentVariableTarget.Process);
+            TransactionOutcomeTableName = Environment.GetEnvironmentVariable("TransactionOutcomeTableName", EnvironmentVariableTarget.Process);
             FiletypeDetectionUrl = Environment.GetEnvironmentVariable("FiletypeDetectionUrl", EnvironmentVariableTarget.Process);
             ServiceBusConnectionString = Environment.GetEnvironmentVariable("ServiceBusConnectionString", EnvironmentVariableTarget.Process);
             FiletypeDetectionKey = Environment.GetEnvironmentVariable("FiletypeDetectionKey", EnvironmentVariableTarget.Process);
@@ -17,8 +19,10 @@ namespace DurableFileProcessing.Services
         }
 
         public string FileProcessingStorage { get; }
+        public string CacheConnectionString { get; }
         public string ServiceBusConnectionString { get; }
         public string TransactionOutcomeQueueName { get; }
+        public string TransactionOutcomeTableName { get; }
         public string FiletypeDetectionUrl { get; }
         public string FiletypeDetectionKey { get; }
         public string RebuildUrl { get; }
