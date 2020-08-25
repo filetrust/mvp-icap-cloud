@@ -27,8 +27,11 @@ namespace DurableFileProcessing.ActivityFunctions
             {
                 log.LogDebug($"No entity for hash: {fileHash} found in cache.");
             }
+            else
+            {
+                log.LogDebug($"Entity for hash: {fileHash} found in cache. File Status: {entity?.FileStatus}, File Type: {entity?.FileType}, TimeStamp: {entity?.Timestamp}");
+            }
 
-            log.LogDebug($"Entity for hash: {fileHash} found in cache. File Status: {entity.FileStatus}, File Type: {entity.FileType}, TimeStamp: {entity.Timestamp}");
             return entity;
         }
     }
