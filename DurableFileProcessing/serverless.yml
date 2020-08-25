@@ -12,8 +12,10 @@ provider:
     RebuildUrl: '--REBUILD_URL--'
     RebuildKey: '--REBUILD_KEY--'
     FileProcessingStorage: '--STORAGE_ACCOUNT_CONNECTION_STRING--'
+    CacheConnectionString: '--CACHE_CONNECTION_STRING--'
     ServiceBusConnectionString: '--SERVICE_BUS_CONNECTION_STRING--'
     TransactionOutcomeQueueName: 'transaction-outcome'
+    TransactionOutcomeTableName: 'filestatuscache'
 
 plugins:
   - serverless-azure-functions

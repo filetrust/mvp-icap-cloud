@@ -2,12 +2,12 @@
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "namespaces_mvpcloudicapsb_name": {
-            "defaultValue": "mvpcloudicapsb",
-            "type": "String"
-        },
+      "namespaces_mvpcloudicapsb_name": {
+        "defaultValue": "gwicapqasb",
+        "type": "String"
+      },
         "storageAccounts_mvpcloudicapsa_name": {
-            "defaultValue": "mvpcloudicapsa",
+            "defaultValue": "gwicapqasa",
             "type": "String"
         }
     },
@@ -137,6 +137,26 @@
             }
         },
         {
+            "type": "Microsoft.Storage/storageAccounts/tableServices",
+            "apiVersion": "2019-06-01",
+            "name": "[concat(parameters('storageAccounts_mvpcloudicapsa_name'), '/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_mvpcloudicapsa_name'))]"
+            ],
+            "sku": {
+                "name": "Standard_RAGRS",
+                "tier": "Standard"
+            },
+            "properties": {
+                "cors": {
+                    "corsRules": []
+                },
+                "deleteRetentionPolicy": {
+                    "enabled": false
+                }
+            }
+        },
+        {
             "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
             "apiVersion": "2019-06-01",
             "name": "[concat(parameters('storageAccounts_mvpcloudicapsa_name'), '/default/original-store')]",
@@ -159,6 +179,15 @@
             "properties": {
                 "publicAccess": "None"
             }
+        },
+        {
+            "name": "[concat(parameters('storageAccounts_mvpcloudicapsa_name'),'/default/filestatuscache')]",
+            "type": "Microsoft.Storage/storageAccounts/tableServices/tables",
+            "apiVersion": "2019-06-01",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/tableServices', parameters('storageAccounts_mvpcloudicapsa_name'), 'default')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_mvpcloudicapsa_name'))]"
+            ]
         }
     ]
 }
