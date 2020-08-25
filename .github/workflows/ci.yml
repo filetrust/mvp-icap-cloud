@@ -66,6 +66,7 @@ jobs:
         FILETYPEDETECTION_KEY: ${{ secrets.QA_FILEYPEDETECTION_API_KEY }}
         STORAGE_ACCOUNT_CONNECTION_STRING: ${{ secrets.QA_STORAGE_CONNECTION_STRING }}
         SERVICE_BUS_CONNECTION_STRING: ${{ secrets.QA_SERVICEBUS_CONNECTION_STRING }}
+        CACHE_CONNECTION_STRING: ${{ secrets.QA_CACHE_CONNECTION_STRING }}
     - name: Setup .NET Core ${{ env.DOTNET_VERSION }} 🔧
       uses: actions/setup-dotnet@v1
       with:
