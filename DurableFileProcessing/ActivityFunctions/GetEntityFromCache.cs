@@ -23,7 +23,7 @@ namespace DurableFileProcessing.ActivityFunctions
 
             var entity = await _cacheManager.GetEntityAsync("durablefileprocessing", fileHash);
 
-            if(entity == null)
+            if (entity == null)
             {
                 log.LogDebug($"No entity for hash: {fileHash} found in cache.");
             }
