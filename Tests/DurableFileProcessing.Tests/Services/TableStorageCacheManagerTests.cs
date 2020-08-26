@@ -13,7 +13,7 @@ namespace DurableFileProcessing.Tests.Services
     {
         public class GetEntityAsyncMethod : TableStorageCacheManagerTests
         {
-            private const string ConnectionString = "ConnectionString";
+            private const string TableName = "TableName";
 
             private Mock<ICacheClient<CloudTableClient>> _mockCacheClient;
             private Mock<IConfigurationSettings> _mockConfigurationSettings;
@@ -30,11 +30,11 @@ namespace DurableFileProcessing.Tests.Services
 
                 _mockCloudTable = new Mock<CloudTable>(new Uri("http://tableaddress.org"), (TableClientConfiguration)null);
 
-                _mockConfigurationSettings.SetupGet(s => s.CacheConnectionString).Returns(ConnectionString);
+                _mockConfigurationSettings.SetupGet(s => s.TransactionOutcomeTableName).Returns(TableName);
 
                 _mockCacheClient.SetupGet(s => s.Client).Returns(_mockCloudTableClient.Object);
 
-                _mockCloudTableClient.Setup(s => s.GetTableReference(It.Is<string>(s => s == ConnectionString))).Returns(_mockCloudTable.Object);
+                _mockCloudTableClient.Setup(s => s.GetTableReference(It.Is<string>(s => s == TableName))).Returns(_mockCloudTable.Object);
             }
 
             [Test]
@@ -79,7 +79,7 @@ namespace DurableFileProcessing.Tests.Services
 
         public class InsertEntityAsyncMethod : TableStorageCacheManagerTests
         {
-            private const string ConnectionString = "ConnectionString";
+            private const string TableName = "TableName";
 
             private Mock<ICacheClient<CloudTableClient>> _mockCacheClient;
             private Mock<IConfigurationSettings> _mockConfigurationSettings;
@@ -96,11 +96,11 @@ namespace DurableFileProcessing.Tests.Services
 
                 _mockCloudTable = new Mock<CloudTable>(new Uri("http://tableaddress.org"), (TableClientConfiguration)null);
 
-                _mockConfigurationSettings.SetupGet(s => s.CacheConnectionString).Returns(ConnectionString);
+                _mockConfigurationSettings.SetupGet(s => s.TransactionOutcomeTableName).Returns(TableName);
 
                 _mockCacheClient.SetupGet(s => s.Client).Returns(_mockCloudTableClient.Object);
 
-                _mockCloudTableClient.Setup(s => s.GetTableReference(It.Is<string>(s => s == ConnectionString))).Returns(_mockCloudTable.Object);
+                _mockCloudTableClient.Setup(s => s.GetTableReference(It.Is<string>(s => s == TableName))).Returns(_mockCloudTable.Object);
             }
 
             [Test]
