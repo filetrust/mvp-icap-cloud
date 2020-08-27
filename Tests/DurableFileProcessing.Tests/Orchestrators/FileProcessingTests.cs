@@ -135,6 +135,61 @@ namespace DurableFileProcessing.Tests
             }
 
             [Test]
+            public async Task When_Hash_Is_Found_In_Cache_RebuildFile_IsNot_Called_And_Cached_Status_Is_Used()
+            {
+                // Arrange
+                ProcessingOutcome actualOutcome = ProcessingOutcome.Unmanaged;
+                ProcessingOutcome expectedOutcome = ProcessingOutcome.Failed;
+
+                _mockContext.Setup(s => s.CallActivityAsync<OutcomeEntity>(
+                    It.Is<string>(s => s == "FileProcessing_GetEntityFromCache"),
+                    It.IsAny<object>()))
+                    .ReturnsAsync(new OutcomeEntity
+                    {
+                        FileType = "docx",
+                        FileStatus = expectedOutcome.ToString()
+                    });
+
+                _mockContext.Setup(s => s.CallActivityAsync<object>(
+                    It.Is<string>(s => s == "FileProcessing_SignalTransactionOutcome"),
+                    It.IsAny<object>()))
+                .Callback<string, object>((s, obj) =>
+                {
+                    var rebuiltOutcome = (RebuildOutcome)obj.GetType().GetField("Item2").GetValue(obj);
+
+                    actualOutcome = rebuiltOutcome.Outcome;
+                });
+
+                // Act
+                await _fileProcessingOrchestrator.RunOrchestrator(_mockContext.Object, _cloudBlobContainer, _mockLogger.Object);
+
+                // Assert
+                _mockContext.Verify(s => s.CallActivityAsync<object>(
+                    It.Is<string>(s => s == "FileProcessing_RebuildFile"),
+                    It.IsAny<object>()), Times.Never);
+
+                Assert.That(actualOutcome, Is.EqualTo(expectedOutcome));
+            }
+
+            [Test]
+            public async Task When_Hash_IsNot_Found_In_Cache_RebuildFile_Is_Called()
+            {
+                // Arrange
+                _mockContext.Setup(s => s.CallActivityAsync<OutcomeEntity>(
+                    It.Is<string>(s => s == "FileProcessing_GetEntityFromCache"),
+                    It.IsAny<object>()))
+                    .ReturnsAsync((OutcomeEntity)null);
+
+                // Act
+                await _fileProcessingOrchestrator.RunOrchestrator(_mockContext.Object, _cloudBlobContainer, _mockLogger.Object);
+
+                // Assert
+                _mockContext.Verify(s => s.CallActivityAsync<object>(
+                    It.Is<string>(s => s == "FileProcessing_RebuildFile"),
+                    It.IsAny<object>()), Times.Once);            
+            }
+
+            [Test]
             public async Task When_Hash_IsNot_Found_In_Cache_InsertEntityIntoCache_Is_Called()
             {
                 // Arrange
@@ -332,7 +387,7 @@ namespace DurableFileProcessing.Tests
 
                 var expectedOutcome = new RebuildOutcome
                 {
-                    Outcome = ProcessingOutcome.Failed,
+                    Outcome = returnedOutcome,
                     RebuiltFileSas = string.Empty
                 };
 

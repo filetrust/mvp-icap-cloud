@@ -52,7 +52,7 @@ namespace DurableFileProcessing.Orchestrators
             }
             else if (filetype == "unmanaged")
             {
-                fileStatus = ProcessingOutcome.Unknown;
+                fileStatus = ProcessingOutcome.Unmanaged;
                 await context.CallActivityAsync("FileProcessing_SignalTransactionOutcome", (blobName, new RebuildOutcome { Outcome = ProcessingOutcome.Unknown, RebuiltFileSas = String.Empty }));
             }
             else
@@ -64,26 +64,30 @@ namespace DurableFileProcessing.Orchestrators
                 log.LogInformation($"FileProcessing using  {rebuildUrl}");
 
                 var rebuildContainer = new CloudBlobContainer(new Uri(rebuildUrl), fileProcessingStorage.Credentials);
-                var sourceSas = _blobUtilities.GetSharedAccessSignature(container, blobName, context.CurrentUtcDateTime.AddHours(24), SharedAccessBlobPermissions.Read);
 
-                // Specify the hash value as the rebuilt filename
-                var rebuiltWritesSas = _blobUtilities.GetSharedAccessSignature(rebuildContainer, hash, context.CurrentUtcDateTime.AddHours(24), SharedAccessBlobPermissions.Write);
-                var rebuildOutcome = await context.CallActivityAsync<ProcessingOutcome>("FileProcessing_RebuildFile", (sourceSas, rebuiltWritesSas, filetype));
+                if (!Enum.TryParse(cachedEntry?.FileStatus, out ProcessingOutcome rebuildOutcome))
+                {
+                    // Specify the hash value as the rebuilt filename
+                    var rebuiltWritesSas = _blobUtilities.GetSharedAccessSignature(rebuildContainer, hash, context.CurrentUtcDateTime.AddHours(24), SharedAccessBlobPermissions.Write);
+                    var sourceSas = _blobUtilities.GetSharedAccessSignature(container, blobName, context.CurrentUtcDateTime.AddHours(24), SharedAccessBlobPermissions.Read);
+
+                    rebuildOutcome = await context.CallActivityAsync<ProcessingOutcome>("FileProcessing_RebuildFile", (sourceSas, rebuiltWritesSas, filetype));
+                }
 
                 if (rebuildOutcome == ProcessingOutcome.Rebuilt)
                 {
-                    fileStatus = ProcessingOutcome.Rebuilt;
                     var rebuiltReadSas = _blobUtilities.GetSharedAccessSignature(rebuildContainer, hash, context.CurrentUtcDateTime.AddHours(24), SharedAccessBlobPermissions.Read);
                     log.LogInformation($"FileProcessing Rebuild {rebuiltReadSas}");
 
-                    await context.CallActivityAsync("FileProcessing_SignalTransactionOutcome", (blobName, new RebuildOutcome { Outcome = ProcessingOutcome.Rebuilt, RebuiltFileSas = rebuiltReadSas }));
+                    await context.CallActivityAsync("FileProcessing_SignalTransactionOutcome", (blobName, new RebuildOutcome { Outcome = rebuildOutcome, RebuiltFileSas = rebuiltReadSas }));
                 }
                 else
                 {
-                    fileStatus = ProcessingOutcome.Failed;
                     log.LogInformation($"FileProcessing Rebuild failure");
-                    await context.CallActivityAsync("FileProcessing_SignalTransactionOutcome", (blobName, new RebuildOutcome { Outcome = ProcessingOutcome.Failed, RebuiltFileSas = String.Empty }));
+                    await context.CallActivityAsync("FileProcessing_SignalTransactionOutcome", (blobName, new RebuildOutcome { Outcome = rebuildOutcome, RebuiltFileSas = String.Empty }));
                 }
+
+                fileStatus = rebuildOutcome;
             }
 
             if (cachedEntry == null)
