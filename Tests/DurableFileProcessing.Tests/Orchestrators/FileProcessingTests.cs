@@ -125,6 +125,11 @@ namespace DurableFileProcessing.Tests
                     It.IsAny<object>()))
                     .ReturnsAsync((OutcomeEntity)null);
 
+                _mockContext.Setup(s => s.CallActivityAsync<string>(
+                    It.Is<string>(s => s == "FileProcessing_GetFileType"),
+                    It.IsAny<object>()))
+                    .ReturnsAsync("Docx");
+
                 // Act
                 await _fileProcessingOrchestrator.RunOrchestrator(_mockContext.Object, _cloudBlobContainer, _mockLogger.Object);
 
@@ -179,6 +184,11 @@ namespace DurableFileProcessing.Tests
                     It.Is<string>(s => s == "FileProcessing_GetEntityFromCache"),
                     It.IsAny<object>()))
                     .ReturnsAsync((OutcomeEntity)null);
+
+                _mockContext.Setup(s => s.CallActivityAsync<string>(
+                    It.Is<string>(s => s == "FileProcessing_GetFileType"),
+                    It.IsAny<object>()))
+                    .ReturnsAsync("Docx");
 
                 // Act
                 await _fileProcessingOrchestrator.RunOrchestrator(_mockContext.Object, _cloudBlobContainer, _mockLogger.Object);
