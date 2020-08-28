@@ -299,7 +299,7 @@ namespace DurableFileProcessing.Tests
             }
 
             [Test]
-            public async Task When_GetFileType_Returns_Unmanaged_UnknownTransactionOutcome_Is_Signaled()
+            public async Task When_GetFileType_Returns_Unmanaged_UnmanagedTransactionOutcome_Is_Signaled()
             {
                 // Arrange
                 RebuildOutcome actualOutcome = null;
@@ -333,6 +333,43 @@ namespace DurableFileProcessing.Tests
                 Assert.That(actualOutcome.Outcome, Is.EqualTo(expectedOutcome.Outcome));
                 Assert.That(actualOutcome.RebuiltFileSas, Is.EqualTo(expectedOutcome.RebuiltFileSas));
             }
+
+            [Test]
+            public async Task When_GetFileType_Returns_Unknown_UnmanagedTransactionOutcome_Is_Signaled()
+            {
+                // Arrange
+                RebuildOutcome actualOutcome = null;
+                string actualBlobName = string.Empty;
+
+                var expectedOutcome = new RebuildOutcome
+                {
+                    Outcome = ProcessingOutcome.Unmanaged,
+                    RebuiltFileSas = string.Empty
+                };
+
+                _mockContext.Setup(s => s.CallActivityAsync<string>(
+                    It.Is<string>(s => s == "FileProcessing_GetFileType"),
+                    It.IsAny<object>()))
+                    .ReturnsAsync("unknown");
+
+                _mockContext.Setup(s => s.CallActivityAsync<object>(
+                    It.Is<string>(s => s == "FileProcessing_SignalTransactionOutcome"),
+                    It.IsAny<object>()))
+                .Callback<string, object>((s, obj) =>
+                {
+                    actualBlobName = (string)obj.GetType().GetField("Item1").GetValue(obj);
+                    actualOutcome = (RebuildOutcome)obj.GetType().GetField("Item2").GetValue(obj);
+                });
+
+                // Act
+                await _fileProcessingOrchestrator.RunOrchestrator(_mockContext.Object, _cloudBlobContainer, _mockLogger.Object);
+
+                // Assert
+                Assert.That(actualBlobName, Is.EqualTo(BlobName));
+                Assert.That(actualOutcome.Outcome, Is.EqualTo(expectedOutcome.Outcome));
+                Assert.That(actualOutcome.RebuiltFileSas, Is.EqualTo(expectedOutcome.RebuiltFileSas));
+            }
+
 
             [Test]
             public async Task When_RebuildOutcome_Is_Rebuilt_RebuiltOutcome_Is_Signaled()

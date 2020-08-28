@@ -45,7 +45,7 @@ namespace DurableFileProcessing.Orchestrators
 
             var filetype = cachedEntry?.FileType ?? await context.CallActivityAsync<string>("FileProcessing_GetFileType", blobSas);
             
-            if (filetype == "error" || filetype == "unmanaged")
+            if (filetype.ToLower() == "error" || filetype.ToLower() == "unmanaged" || filetype.ToLower() == "unknown")
             {
                 fileStatus = filetype == "error" ? ProcessingOutcome.Error : ProcessingOutcome.Unmanaged;
                 await context.CallActivityAsync("FileProcessing_SignalTransactionOutcome", (blobName, new RebuildOutcome { Outcome = fileStatus, RebuiltFileSas = String.Empty }));
