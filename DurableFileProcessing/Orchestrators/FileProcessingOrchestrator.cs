@@ -45,15 +45,10 @@ namespace DurableFileProcessing.Orchestrators
 
             var filetype = cachedEntry?.FileType ?? await context.CallActivityAsync<string>("FileProcessing_GetFileType", blobSas);
             
-            if (filetype == "error")
+            if (filetype == "error" || filetype == "unmanaged")
             {
-                fileStatus = ProcessingOutcome.Error;
-                await context.CallActivityAsync("FileProcessing_SignalTransactionOutcome", (blobName, new RebuildOutcome { Outcome = ProcessingOutcome.Error, RebuiltFileSas = String.Empty }));
-            }
-            else if (filetype == "unmanaged")
-            {
-                fileStatus = ProcessingOutcome.Unmanaged;
-                await context.CallActivityAsync("FileProcessing_SignalTransactionOutcome", (blobName, new RebuildOutcome { Outcome = ProcessingOutcome.Unknown, RebuiltFileSas = String.Empty }));
+                fileStatus = filetype == "error" ? ProcessingOutcome.Error : ProcessingOutcome.Unmanaged;
+                await context.CallActivityAsync("FileProcessing_SignalTransactionOutcome", (blobName, new RebuildOutcome { Outcome = fileStatus, RebuiltFileSas = String.Empty }));
             }
             else
             {
@@ -74,20 +69,20 @@ namespace DurableFileProcessing.Orchestrators
                     rebuildOutcome = await context.CallActivityAsync<ProcessingOutcome>("FileProcessing_RebuildFile", (sourceSas, rebuiltWritesSas, filetype));
                 }
 
+                fileStatus = rebuildOutcome;
+
                 if (rebuildOutcome == ProcessingOutcome.Rebuilt)
                 {
                     var rebuiltReadSas = _blobUtilities.GetSharedAccessSignature(rebuildContainer, hash, context.CurrentUtcDateTime.AddHours(24), SharedAccessBlobPermissions.Read);
                     log.LogInformation($"FileProcessing Rebuild {rebuiltReadSas}");
 
-                    await context.CallActivityAsync("FileProcessing_SignalTransactionOutcome", (blobName, new RebuildOutcome { Outcome = rebuildOutcome, RebuiltFileSas = rebuiltReadSas }));
+                    await context.CallActivityAsync("FileProcessing_SignalTransactionOutcome", (blobName, new RebuildOutcome { Outcome = fileStatus, RebuiltFileSas = rebuiltReadSas }));
                 }
                 else
                 {
                     log.LogInformation($"FileProcessing Rebuild failure");
-                    await context.CallActivityAsync("FileProcessing_SignalTransactionOutcome", (blobName, new RebuildOutcome { Outcome = rebuildOutcome, RebuiltFileSas = String.Empty }));
+                    await context.CallActivityAsync("FileProcessing_SignalTransactionOutcome", (blobName, new RebuildOutcome { Outcome = fileStatus, RebuiltFileSas = String.Empty }));
                 }
-
-                fileStatus = rebuildOutcome;
             }
 
             if (cachedEntry == null)

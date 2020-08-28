@@ -21,9 +21,7 @@ namespace DurableFileProcessing.Tests.ActivityFunctions
             private Mock<IDurableActivityContext> _mockContext;
             private Mock<IConfigurationSettings> _mockSettings;
             private Mock<ILogger> _mockLogger;
-
             private GetFileType _classUnderTest;
-
             private HttpTest _httpTest;
 
             [SetUp]

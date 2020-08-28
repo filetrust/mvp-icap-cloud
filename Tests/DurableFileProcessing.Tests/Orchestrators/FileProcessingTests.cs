@@ -307,7 +307,7 @@ namespace DurableFileProcessing.Tests
 
                 var expectedOutcome = new RebuildOutcome
                 {
-                    Outcome = ProcessingOutcome.Unknown,
+                    Outcome = ProcessingOutcome.Unmanaged,
                     RebuiltFileSas = string.Empty
                 };
 

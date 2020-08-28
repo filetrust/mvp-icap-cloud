@@ -24,9 +24,7 @@ namespace DurableFileProcessing.Tests.ActivityFunctions
             private Mock<IDurableActivityContext> _mockContext;
             private Mock<ILogger> _mockLogger;
             private Mock<IConfigurationSettings> _mockSettings;
-
             private RebuildFile _classUnderTest;
-
             private HttpTest _httpTest;
 
             [SetUp]
