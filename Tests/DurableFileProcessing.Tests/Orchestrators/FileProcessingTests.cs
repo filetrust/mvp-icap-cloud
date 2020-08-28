@@ -125,6 +125,11 @@ namespace DurableFileProcessing.Tests
                     It.IsAny<object>()))
                     .ReturnsAsync((OutcomeEntity)null);
 
+                _mockContext.Setup(s => s.CallActivityAsync<string>(
+                    It.Is<string>(s => s == "FileProcessing_GetFileType"),
+                    It.IsAny<object>()))
+                    .ReturnsAsync("Docx");
+
                 // Act
                 await _fileProcessingOrchestrator.RunOrchestrator(_mockContext.Object, _cloudBlobContainer, _mockLogger.Object);
 
@@ -132,6 +137,66 @@ namespace DurableFileProcessing.Tests
                 _mockContext.Verify(s => s.CallActivityAsync<string>(
                     It.Is<string>(s => s == "FileProcessing_GetFileType"),
                     It.IsAny<object>()), Times.Once);
+            }
+
+            [Test]
+            public async Task When_Hash_Is_Found_In_Cache_RebuildFile_IsNot_Called_And_Cached_Status_Is_Used()
+            {
+                // Arrange
+                ProcessingOutcome actualOutcome = ProcessingOutcome.Unmanaged;
+                ProcessingOutcome expectedOutcome = ProcessingOutcome.Failed;
+
+                _mockContext.Setup(s => s.CallActivityAsync<OutcomeEntity>(
+                    It.Is<string>(s => s == "FileProcessing_GetEntityFromCache"),
+                    It.IsAny<object>()))
+                    .ReturnsAsync(new OutcomeEntity
+                    {
+                        FileType = "docx",
+                        FileStatus = expectedOutcome.ToString()
+                    });
+
+                _mockContext.Setup(s => s.CallActivityAsync<object>(
+                    It.Is<string>(s => s == "FileProcessing_SignalTransactionOutcome"),
+                    It.IsAny<object>()))
+                .Callback<string, object>((s, obj) =>
+                {
+                    var rebuiltOutcome = (RebuildOutcome)obj.GetType().GetField("Item2").GetValue(obj);
+
+                    actualOutcome = rebuiltOutcome.Outcome;
+                });
+
+                // Act
+                await _fileProcessingOrchestrator.RunOrchestrator(_mockContext.Object, _cloudBlobContainer, _mockLogger.Object);
+
+                // Assert
+                _mockContext.Verify(s => s.CallActivityAsync<object>(
+                    It.Is<string>(s => s == "FileProcessing_RebuildFile"),
+                    It.IsAny<object>()), Times.Never);
+
+                Assert.That(actualOutcome, Is.EqualTo(expectedOutcome));
+            }
+
+            [Test]
+            public async Task When_Hash_IsNot_Found_In_Cache_RebuildFile_Is_Called()
+            {
+                // Arrange
+                _mockContext.Setup(s => s.CallActivityAsync<OutcomeEntity>(
+                    It.Is<string>(s => s == "FileProcessing_GetEntityFromCache"),
+                    It.IsAny<object>()))
+                    .ReturnsAsync((OutcomeEntity)null);
+
+                _mockContext.Setup(s => s.CallActivityAsync<string>(
+                    It.Is<string>(s => s == "FileProcessing_GetFileType"),
+                    It.IsAny<object>()))
+                    .ReturnsAsync("Docx");
+
+                // Act
+                await _fileProcessingOrchestrator.RunOrchestrator(_mockContext.Object, _cloudBlobContainer, _mockLogger.Object);
+
+                // Assert
+                _mockContext.Verify(s => s.CallActivityAsync<object>(
+                    It.Is<string>(s => s == "FileProcessing_RebuildFile"),
+                    It.IsAny<object>()), Times.Once);            
             }
 
             [Test]
@@ -244,7 +309,7 @@ namespace DurableFileProcessing.Tests
             }
 
             [Test]
-            public async Task When_GetFileType_Returns_Unmanaged_UnknownTransactionOutcome_Is_Signaled()
+            public async Task When_GetFileType_Returns_Unmanaged_UnmanagedTransactionOutcome_Is_Signaled()
             {
                 // Arrange
                 RebuildOutcome actualOutcome = null;
@@ -252,7 +317,7 @@ namespace DurableFileProcessing.Tests
 
                 var expectedOutcome = new RebuildOutcome
                 {
-                    Outcome = ProcessingOutcome.Unknown,
+                    Outcome = ProcessingOutcome.Unmanaged,
                     RebuiltFileSas = string.Empty
                 };
 
@@ -278,6 +343,43 @@ namespace DurableFileProcessing.Tests
                 Assert.That(actualOutcome.Outcome, Is.EqualTo(expectedOutcome.Outcome));
                 Assert.That(actualOutcome.RebuiltFileSas, Is.EqualTo(expectedOutcome.RebuiltFileSas));
             }
+
+            [Test]
+            public async Task When_GetFileType_Returns_Unknown_UnmanagedTransactionOutcome_Is_Signaled()
+            {
+                // Arrange
+                RebuildOutcome actualOutcome = null;
+                string actualBlobName = string.Empty;
+
+                var expectedOutcome = new RebuildOutcome
+                {
+                    Outcome = ProcessingOutcome.Unmanaged,
+                    RebuiltFileSas = string.Empty
+                };
+
+                _mockContext.Setup(s => s.CallActivityAsync<string>(
+                    It.Is<string>(s => s == "FileProcessing_GetFileType"),
+                    It.IsAny<object>()))
+                    .ReturnsAsync("unknown");
+
+                _mockContext.Setup(s => s.CallActivityAsync<object>(
+                    It.Is<string>(s => s == "FileProcessing_SignalTransactionOutcome"),
+                    It.IsAny<object>()))
+                .Callback<string, object>((s, obj) =>
+                {
+                    actualBlobName = (string)obj.GetType().GetField("Item1").GetValue(obj);
+                    actualOutcome = (RebuildOutcome)obj.GetType().GetField("Item2").GetValue(obj);
+                });
+
+                // Act
+                await _fileProcessingOrchestrator.RunOrchestrator(_mockContext.Object, _cloudBlobContainer, _mockLogger.Object);
+
+                // Assert
+                Assert.That(actualBlobName, Is.EqualTo(BlobName));
+                Assert.That(actualOutcome.Outcome, Is.EqualTo(expectedOutcome.Outcome));
+                Assert.That(actualOutcome.RebuiltFileSas, Is.EqualTo(expectedOutcome.RebuiltFileSas));
+            }
+
 
             [Test]
             public async Task When_RebuildOutcome_Is_Rebuilt_RebuiltOutcome_Is_Signaled()
@@ -332,7 +434,7 @@ namespace DurableFileProcessing.Tests
 
                 var expectedOutcome = new RebuildOutcome
                 {
-                    Outcome = ProcessingOutcome.Failed,
+                    Outcome = returnedOutcome,
                     RebuiltFileSas = string.Empty
                 };
 

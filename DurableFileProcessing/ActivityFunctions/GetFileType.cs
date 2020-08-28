@@ -1,4 +1,5 @@
 ﻿using DurableFileProcessing.Interfaces;
+using DurableFileProcessing.Services;
 using Flurl.Http;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
@@ -21,20 +22,24 @@ namespace DurableFileProcessing.ActivityFunctions
         public async Task<string> Run([ActivityTrigger] IDurableActivityContext context, ILogger log)
         {
             string blobSas = context.GetInput<string>();
+
             var filetypeDetectionUrl = _configurationSettings.FiletypeDetectionUrl;
             var filetypeDetectionKey = _configurationSettings.FiletypeDetectionKey;
 
             log.LogInformation($"GetFileType, filetypeDetectionUrl='{filetypeDetectionUrl}'");
             log.LogInformation($"GetFileType, blobSas='{blobSas}'");
+
             try
             {
-                var response = await filetypeDetectionUrl
-                                        .WithHeader("x-api-key", filetypeDetectionKey)
-                                        .PostJsonAsync(new
-                                        {
-                                            SasUrl = blobSas
-                                        })
-                                        .ReceiveJson();
+                var response = await PollyPolicies.ApiRetryPolicy.ExecuteAsync(async () =>
+                {
+                    return await filetypeDetectionUrl
+                        .WithHeader("x-api-key", filetypeDetectionKey)
+                        .PostJsonAsync(new
+                        {
+                            SasUrl = blobSas
+                        });
+                }).ReceiveJson();
 
                 return response.FileTypeName;
             }
