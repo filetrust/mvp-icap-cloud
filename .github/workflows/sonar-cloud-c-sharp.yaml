@@ -4,7 +4,7 @@ env:
   SONAR_PROJECT: MVP-icap-cloud-csharp
 on:
   push:
-    branches: '*'
+    branches: [ master ]
   pull_request:
     branches: [ master ]
 jobs:
