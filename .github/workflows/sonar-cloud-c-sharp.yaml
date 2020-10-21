@@ -1,0 +1,26 @@
+name: sonar-csharp
+env:
+  SONAR_ORG: filetrust-2
+  SONAR_PROJECT: MVP-icap-cloud-csharp
+on:
+  push:
+    branches: [ develop ]
+  pull_request:
+    branches: [ develop ]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: glasswallsolutions/icap-cs-base:latest
+    steps:
+        - name: Checkout Project
+          uses: actions/checkout@v1
+          with:
+            submodules: true
+        - name: scan csharp code
+          run: |
+            /root/.dotnet/tools/dotnet-sonarscanner begin   /o:"${{ env.SONAR_ORG }}"  /d:sonar.login="${{ secrets.SONAR_TOKEN }}"  /k:"${{ env.SONAR_PROJECT }}"  /d:sonar.host.url=https://sonarcloud.io /d:sonar.cfamily.build-wrapper-output="build_wrapper_output_directory"
+            dotnet build
+            /root/.dotnet/tools/dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}" 
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
