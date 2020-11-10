@@ -1,7 +1,7 @@
 name: sonar-csharp
 env:
-  SONAR_ORG: filetrust-2
-  SONAR_PROJECT: MVP-icap-cloud-csharp
+  SONAR_ORG: jameelnabbo
+  SONAR_PROJECT: JameelNabbo_mvp-icap-cloud
 on:
   push:
     branches: [ develop ]
