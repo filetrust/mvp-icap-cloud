@@ -1,6 +1,6 @@
 name: sonar-csharp
 env:
-  SONAR_ORG: filetrust-2
+  SONAR_ORG: filetrust-2-1
   SONAR_PROJECT: MVP-icap-cloud-csharp
 on:
   push:
